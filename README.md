@@ -1,11 +1,12 @@
-# jfrog-artifactory-libs
+# Backstage JFrog artifactory libraries plugin
 
-The Backstage `jfrog-artifactory-libs` frontend plugin provides a simple way to display generated artifact (library) details like - group, artifact, repository, what is the latest version, and it simply allows to copy library definition for the package managers.   
-Nowadays, the plugin supports these package managers in JFrog: Maven, Gradle, Sbt, Pypi. 
+The Backstage `jfrog-artifactory-libs` frontend plugin provides a simple way to display generated artifact (library)
+details like - group, artifact, repository, what is the latest version, and it simply allows to copy library definition
+for the package managers.   
+Nowadays, the plugin supports these package managers in JFrog: Maven, Gradle, Sbt, Pypi.
 
-
-![Demo](./doc/artifact.gif)
 <!-- TOC -->
+
 - [Backstage jfrog-artifactory-libs plugin](#backstage-xkcd-plugin)
     - [Installation](#installation)
     - [Integration](#integration)
@@ -21,7 +22,6 @@ Nowadays, the plugin supports these package managers in JFrog: Maven, Gradle, Sb
 
 To install the plugin, you'll need to add it to your Backstage app's dependencies using either Yarn or NPM.
 
-
 **Yarn**
 
 ```shell
@@ -35,7 +35,7 @@ Once you've installed the plugin, you'll need to integrate it into your Backstag
 Add the LibArtifactCard component to the `EntityPage.tsx` in your app:
 
 ```typescript jsx
-import { LibArtifactCard, isJfrogArtifactAvailable } from 'backstage-plugin-jfrog-artifactory-libs';
+import {LibArtifactCard, isJfrogArtifactAvailable} from 'backstage-plugin-jfrog-artifactory-libs';
 //....
 const overviewContent = (
 // ...
@@ -63,7 +63,8 @@ Set up a proxy for the JFrog API by adding the following configuration to your a
       X-Result-Detail: 'properties'
       Accept: '*'
 ```
-You have to also reference your artifactory URL (used for UI browse links) and your proxy configuration. 
+
+You have to also reference your artifactory URL (used for UI browse links) and your proxy configuration.
 
 ```yaml
 jfrog:
@@ -73,48 +74,54 @@ jfrog:
 ```
 
 ### Catalog-info.yaml
+
 Artifact details are correlated to Backstage entities using an annotation added in the entity's catalog-info.yaml file.
+
 ```yaml
   metadata:
     # -- required values --
     jfrog.com/artifactory-artifact: 'artifact-name'
     jfrog.com/artifactory-repo: 'maven-local'
-        
+
     jfrog.com/artifactory-group: 'com.mycompany' # optional string - can be blank for pypi, necessary for Maven repos
-    
+
     # -- optional values --
     jfrog.com/artifactory-scope: 'compile' # optional string, one of these [compile, test,provided,runtime,classpath,optional]
     jfrog.com/artifactory-packaging: 'aar' #optional string, eg. `aar` 
 
 ```
 
-And that's it! The plugin should now be integrated into your Backstage app, and you should see the Artifact card when you navigate to the  entity page where it's included.
+And that's it! The plugin should now be integrated into your Backstage app, and you should see the Artifact card when
+you navigate to the entity page where it's included.
 
 ## Configuration
-`LibArtifactCard` has following default properties: 
+
+`LibArtifactCard` has following default properties:
 
 ```typescript typescript jsx
 LibArtifactCard.defaultProps = {
-  title: 'Artifact', // title of the card
-  browseRepositoryLinkTitle: 'Browse Repository', // Card deep link title
-  showGradle: true, // whether to show Gradle package manager tab
-  showMaven: true, // whether to  show Maven package manager tab
-  showSbt: true, // whether to  show Sbt package manager tab
-  showPip: true, // whether to  show Pip package manager tab
-  // it hides Maven and Gradle tabs if the current repository package type is `PyPi`
-  autohideTabs: true,
-  showBrowseRepositoryLink: true // whether to show Browse to URL deep link under bottom of the Card
+    title: 'Artifact', // title of the card
+    browseRepositoryLinkTitle: 'Browse Repository', // Card deep link title
+    showGradle: true, // whether to show Gradle package manager tab
+    showMaven: true, // whether to  show Maven package manager tab
+    showSbt: true, // whether to  show Sbt package manager tab
+    showPip: true, // whether to  show Pip package manager tab
+    // it hides Maven and Gradle tabs if the current repository package type is `PyPi`
+    autohideTabs: true,
+    showBrowseRepositoryLink: true // whether to show Browse to URL deep link under bottom of the Card
 };
 
 ```
 
-
 ## How it works
-Plugin uses JFrog APIs to find latest version. It's necessary to specify `ARTIFACTORY_TOKEN` in the `app-config.yaml` file if you don't allow to access API for anonymous user. 
+
+Plugin uses JFrog APIs to find latest version. It's necessary to specify `ARTIFACTORY_TOKEN` in the `app-config.yaml`
+file if you don't allow to access API for anonymous user.
 
 ## Contributing
 
-Don't hesitate to contribute to the plugin. This is my ~~first~~ second TypeScript/React/Backstage product so please be gentle to me...
+Don't hesitate to contribute to the plugin. This is my first TypeScript/React/Backstage product so please be gentle to
+me...
 
 ### Development
 
