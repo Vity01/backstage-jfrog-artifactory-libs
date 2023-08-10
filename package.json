@@ -4,6 +4,7 @@
   "main": "src/index.ts",
   "types": "src/index.ts",
   "license": "Apache-2.0",
+  "private": false,
   "publishConfig": {
     "access": "public",
     "main": "dist/index.esm.js",
@@ -12,11 +13,33 @@
   "backstage": {
     "role": "frontend-plugin"
   },
+  "homepage": "https://github.com/Vity01/backstage-jfrog-artifactory-libs/",
+  "bugs": {
+    "url": "https://github.com/Vity01/backstage-jfrog-artifactory-libs/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Vity01/backstage-jfrog-artifactory-libs"
+  },
+  "keywords": [
+    "backstage",
+    "jfrog",
+    "artifactory"
+  ],
+  "jest": {
+    "coveragePathIgnorePatterns": [
+      "src/components/types.ts"
+    ]
+  },
   "scripts": {
     "start": "backstage-cli package start",
+    "dev": "concurrently \"yarn start\" \"yarn start-backend\"",
     "build": "backstage-cli package build",
     "lint": "backstage-cli package lint",
     "test": "backstage-cli package test",
+    "coverage": "backstage-cli package test --coverage",
+    "tsc": "tsc",
+    "tsc:full": "tsc --skipLibCheck false --incremental false",
     "clean": "backstage-cli package clean",
     "prepack": "backstage-cli package prepack",
     "postpack": "backstage-cli package postpack",
