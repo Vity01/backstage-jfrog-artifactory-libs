@@ -114,7 +114,7 @@ Plugin uses JFrog APIs to find latest version. It's necessary to specify `ARTIFA
 
 ## Contributing
 
-Don't hesitate to contribute to the plugin. This is my first TypeScript/React/Backstage product so please be gentle to me...
+Don't hesitate to contribute to the plugin. This is my ~~first~~ second TypeScript/React/Backstage product so please be gentle to me...
 
 ### Development
 
