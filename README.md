@@ -5,6 +5,9 @@ details like - group, artifact, repository, what is the latest version, and it s
 for the package managers.   
 Nowadays, the plugin supports these package managers in JFrog: Maven, Gradle, Sbt, Pypi.
 
+
+![Demo](./doc/artifact.gif)
+
 <!-- TOC -->
 
 - [Backstage jfrog-artifactory-libs plugin](#backstage-xkcd-plugin)
