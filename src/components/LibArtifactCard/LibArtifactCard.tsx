@@ -5,7 +5,6 @@ import {
 
 } from '@backstage/core-components';
 import {useEntity} from '@backstage/plugin-catalog-react';
-import {ComponentEntityV2alpha1} from 'backstage-plugin-avast-schema-definition/dist';
 import {
     ENTITY_ARTIFACT,
     ENTITY_GROUP,
@@ -17,6 +16,7 @@ import {
 import {generatePackageManagersCode} from './codeSnippets';
 import {LibVerTabbedContent} from "../LibVerTabbedContent";
 import {findLatestVersion} from "./versionUtils";
+import {Entity} from "@backstage/catalog-model";
 
 export type GeneratedCode = {
     gradle: string;
@@ -137,7 +137,7 @@ async function getPypiLatestVersion(
 export const LibArtifactCard = (props: LibArtifactCardProps) => {
     const {fetch} = useApi(fetchApiRef);
     const config = useApi(configApiRef);
-    const {entity} = useEntity<ComponentEntityV2alpha1>();
+    const {entity} = useEntity<Entity>();
 
     const artifactoryUrl = config.getString('jfrog.artifactory.url');
     const artifactoryBackendProxy = config.getOptionalString('jfrog.artifactory.proxyPath') || '/artifactory-proxy/';
@@ -211,13 +211,13 @@ export const LibArtifactCard = (props: LibArtifactCardProps) => {
 };
 
 LibArtifactCard.defaultProps = {
-    title: 'Artifact',
-    browseRepositoryLinkTitle: 'Browse Repository',
-    showGradle: true,
-    showMaven: true,
-    showSbt: true,
-    showPip: true,
+    title: 'Artifact', // title of the card
+    browseRepositoryLinkTitle: 'Browse Repository', // Card deep link title
+    showGradle: true, // whether to show Gradle package manager tab
+    showMaven: true, // whether to  show Maven package manager tab
+    showSbt: true, // whether to  show Sbt package manager tab
+    showPip: true, // whether to  show Pip package manager tab
     // it hides Maven and Gradle tabs if the current repository package type is `PyPi`
     autohideTabs: true,
-    showBrowseRepositoryLink: true
+    showBrowseRepositoryLink: true // whether to show Browse to URL deep link under bottom of the Card
 };

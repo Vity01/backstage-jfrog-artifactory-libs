@@ -88,6 +88,25 @@ Artifact details are correlated to Backstage entities using an annotation added 
 
 And that's it! The plugin should now be integrated into your Backstage app, and you should see the Artifact card when you navigate to the  entity page where it's included.
 
+## Configuration
+`LibArtifactCard` has following default properties: 
+
+```typescript typescript jsx
+LibArtifactCard.defaultProps = {
+  title: 'Artifact', // title of the card
+  browseRepositoryLinkTitle: 'Browse Repository', // Card deep link title
+  showGradle: true, // whether to show Gradle package manager tab
+  showMaven: true, // whether to  show Maven package manager tab
+  showSbt: true, // whether to  show Sbt package manager tab
+  showPip: true, // whether to  show Pip package manager tab
+  // it hides Maven and Gradle tabs if the current repository package type is `PyPi`
+  autohideTabs: true,
+  showBrowseRepositoryLink: true // whether to show Browse to URL deep link under bottom of the Card
+};
+
+```
+
+
 ## How it works
 Plugin uses JFrog APIs to find latest version. It's necessary to specify `ARTIFACTORY_TOKEN` in the `app-config.yaml` file if you don't allow to access API for anonymous user. 
 
