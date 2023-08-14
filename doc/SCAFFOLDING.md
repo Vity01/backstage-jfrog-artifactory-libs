@@ -49,6 +49,8 @@ libraryArtifact:
 
 Alternatively you can use a Scaffolding UI component `ArtifactRepositoryPicker` for Repository name field (`jfrogArtifactoryRepo`). It can help to users choose correct value + it adds a validation, only existing repository has to be selected.
 
+![Repository](repository.png)
+
 First you have to register ArtifactRepositoryPickerFieldExtension in your App.tsx.
 
 ```tsx
