@@ -13,4 +13,4 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export { LibArtifactCard } from './LibArtifactCard';
+export { LibArtifactCard, DEFAULT_PROXY_PATH } from './LibArtifactCard';

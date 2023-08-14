@@ -16,6 +16,10 @@
 import {createComponentExtension, createPlugin, createRoutableExtension} from '@backstage/core-plugin-api';
 
 import { rootRouteRef } from './routes';
+import {scaffolderPlugin} from "@backstage/plugin-scaffolder";
+import {createScaffolderFieldExtension} from "@backstage/plugin-scaffolder-react";
+import {ArtifactRepositoryPicker} from "./components/ArtifactRepositoryPicker";
+import {ArtifactRepositoryPickerSchema} from "./components/ArtifactRepositoryPicker/schema";
 
 
 export const jfrogArtifactoryLibsPlugin = createPlugin({
@@ -42,4 +46,18 @@ export const JfrogArtifactoryLibsPage = jfrogArtifactoryLibsPlugin.provide(
       import('./components/LibArtifactCard').then(m => m.LibArtifactCard),
     mountPoint: rootRouteRef,
   }),
+);
+
+
+/**
+ * A field extension for selecting an Entity that exists in the Catalog.
+ *
+ * @public
+ */
+export const ArtifactRepositoryPickerFieldExtension = scaffolderPlugin.provide(
+    createScaffolderFieldExtension({
+        component: ArtifactRepositoryPicker,
+        name: 'ArtifactRepositoryPicker',
+        schema: ArtifactRepositoryPickerSchema,
+    }),
 );

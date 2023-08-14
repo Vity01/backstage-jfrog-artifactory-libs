@@ -11,14 +11,15 @@ Nowadays, the plugin supports these package managers in JFrog: Maven, Gradle, Sb
 <!-- TOC -->
 
 - [Backstage jfrog-artifactory-libs plugin](#backstage-xkcd-plugin)
-    - [Installation](#installation)
-    - [Integration](#integration)
-    - [Configuration](#configuration)
-    - [How it works](#how-it-works)
-    - [Contributing](#contributing)
-        - [Development](#development)
-    - [Future plans](#future-plans)
-    - [License](#license)
+  - [Installation](#installation)
+  - [Integration](#integration)
+  - [Configuration](#configuration)
+    - [Support for scaffolding](#support-for-scaffolding) 
+  - [How it works](#how-it-works)
+  - [Contributing](#contributing)
+    - [Development](#development)
+  - [Future plans](#future-plans)
+  - [License](#license)
   <!-- TOC -->
 
 ## Installation
@@ -115,6 +116,9 @@ LibArtifactCard.defaultProps = {
 };
 
 ```
+### Support for scaffolding
+In [this document](./doc/SCAFFOLDING.md) you can find detailed information how to integrate this plugin into scaffolding templates.
+It also adds a new extension UI component called `ArtifactRepositoryPicker` for interactive repository selection. 
 
 ## How it works
 

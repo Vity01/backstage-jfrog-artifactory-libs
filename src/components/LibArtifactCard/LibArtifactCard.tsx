@@ -58,7 +58,7 @@ export interface VersionsPropsListResponse {
 }
 
 
-async function getErrorMessage(response: Response) {
+export async function getErrorMessage(response: Response) {
     return ((await response.json()) as Errors).errors[0].message;
 }
 
@@ -134,13 +134,14 @@ async function getPypiLatestVersion(
     }
 }
 
+export const DEFAULT_PROXY_PATH = '/artifactory-proxy/';
 export const LibArtifactCard = (props: LibArtifactCardProps) => {
     const {fetch} = useApi(fetchApiRef);
     const config = useApi(configApiRef);
     const {entity} = useEntity<Entity>();
 
     const artifactoryUrl = config.getString('jfrog.artifactory.url');
-    const artifactoryBackendProxy = config.getOptionalString('jfrog.artifactory.proxyPath') || '/artifactory-proxy/';
+    const artifactoryBackendProxy = config.getOptionalString('jfrog.artifactory.proxyPath') || DEFAULT_PROXY_PATH;
 
     const annotations = entity.metadata?.annotations;
 
