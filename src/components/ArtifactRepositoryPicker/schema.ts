@@ -36,9 +36,11 @@ export const RepositoryPickerFieldSchema = makeFieldSchemaFromZod(
      * @deprecated Use `catalogFilter` instead.
      */
     excludedRegex: z
-        .array(z.string())
-        .optional()
-        .describe('Array of regular expressions for filtering repositories out by name'),
+      .array(z.string())
+      .optional()
+      .describe(
+        'Array of regular expressions for filtering repositories out by name',
+      ),
     allowedTypes: z
       .array(
         z.enum(['local', 'virtual', 'remote', 'federated', 'distribution']),
@@ -95,7 +97,8 @@ export type RepositoryPickerUiOptions =
 
 export type RepositoryPickerProps = typeof RepositoryPickerFieldSchema.type;
 
-export const ArtifactRepositoryPickerSchema = RepositoryPickerFieldSchema.schema;
+export const ArtifactRepositoryPickerSchema =
+  RepositoryPickerFieldSchema.schema;
 
 export type RepositoryPickerFilterQuery = z.TypeOf<
   typeof entityQueryFilterExpressionSchema

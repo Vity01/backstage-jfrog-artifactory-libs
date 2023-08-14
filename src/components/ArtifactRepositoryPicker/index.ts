@@ -13,5 +13,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export { RepositoryPickerFieldSchema, type RepositoryPickerUiOptions } from './schema';
-export {ArtifactRepositoryPicker} from './ArtifactRepositoryPicker'
+export {
+  RepositoryPickerFieldSchema,
+  type RepositoryPickerUiOptions,
+} from './schema';
+export { ArtifactRepositoryPicker } from './ArtifactRepositoryPicker';

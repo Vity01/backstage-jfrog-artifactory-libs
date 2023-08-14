@@ -209,7 +209,7 @@ function buildRepositoryFilterSettings(
   const excludedRegex = uiSchema['ui:options']?.excludedRegex
     ?.map(regexString => createRegExpFromString(regexString))
     .filter(item => item !== undefined)
-      .map(regex => regex as RegExp);
+    .map(regex => regex as RegExp);
 
   return {
     repositoryTypes: allowedTypes?.map(item => item.toLowerCase()),

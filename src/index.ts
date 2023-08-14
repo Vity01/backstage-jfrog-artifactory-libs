@@ -17,7 +17,7 @@ export {
   jfrogArtifactoryLibsPlugin,
   JfrogArtifactoryLibsPage,
   LibArtifactCard,
-  ArtifactRepositoryPickerFieldExtension
+  ArtifactRepositoryPickerFieldExtension,
 } from './plugin';
 
 export * from './types';

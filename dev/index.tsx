@@ -15,13 +15,16 @@
  */
 import React from 'react';
 import { createDevApp } from '@backstage/dev-utils';
-import { jfrogArtifactoryLibsPlugin, JfrogArtifactoryLibsPage } from '../src/plugin';
+import {
+  jfrogArtifactoryLibsPlugin,
+  JfrogArtifactoryLibsPage,
+} from '../src/plugin';
 
 createDevApp()
   .registerPlugin(jfrogArtifactoryLibsPlugin)
   .addPage({
     element: <JfrogArtifactoryLibsPage />,
     title: 'Root Page',
-    path: '/jfrog-artifactory-libs'
+    path: '/jfrog-artifactory-libs',
   })
   .render();

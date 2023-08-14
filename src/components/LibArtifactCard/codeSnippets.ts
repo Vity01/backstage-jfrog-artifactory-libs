@@ -1,5 +1,5 @@
-import {GeneratedCode} from './LibArtifactCard';
-import {LibraryArtifact} from "../../types";
+import { GeneratedCode } from './LibArtifactCard';
+import { LibraryArtifact } from '../../types';
 
 function removeScalaVersion(artifactName: string) {
   const underscorePos = artifactName.lastIndexOf('_');
@@ -53,7 +53,6 @@ function generateGradleMavenCode(
     func2 +
     transitive +
     '\n';
-
 
   const maven = `<dependency>\n\t<groupId>${lib.group}</groupId>\n\t<artifactId>${lib.artifact}</artifactId>\n\t<version>${version}</version>${mavenClassifier}\n\t<scope>${mavenScope}</scope>\n</dependency>\n`;
 

@@ -7,10 +7,8 @@ import {
 } from '@backstage/core-components';
 import { LibVerView } from '../LibVerView';
 import React from 'react';
-import {
-  ArtifactInfo,
-} from '../LibArtifactCard/LibArtifactCard';
-import {getBrowserVersionUrl} from "../LibVerView/LibVerView";
+import { ArtifactInfo } from '../LibArtifactCard/LibArtifactCard';
+import { getBrowserVersionUrl } from '../LibVerView/LibVerView';
 
 export type LibVerTabbedContentProps = {
   props: LibArtifactCardProps;
@@ -86,7 +84,9 @@ function getInfoTab(
   return (
     <CardTab label="Info" key="artifactInfo">
       {loading && <Progress />}
-      {!loading && <LibVerView artifactoryUrl={artifactoryUrl} lib={artifactInfo!!.lib} />}
+      {!loading && (
+        <LibVerView artifactoryUrl={artifactoryUrl} lib={artifactInfo!!.lib} />
+      )}
     </CardTab>
   );
 }
@@ -97,7 +97,6 @@ export const LibVerTabbedContent = ({
   artifactoryUrl,
   artifactInfo,
 }: LibVerTabbedContentProps) => {
-
   const tabs: React.JSX.Element[] = [];
   tabs.push(getInfoTab(loading, artifactInfo, artifactoryUrl));
   if (props.showGradle && isMavenPackageType(props, artifactInfo)) {
@@ -113,10 +112,14 @@ export const LibVerTabbedContent = ({
     tabs.push(getPipTab(artifactInfo));
   }
 
-  const deepLink = props.showBrowseRepositoryLink? {
-    link: loading ? '' : getBrowserVersionUrl(artifactoryUrl, artifactInfo!!.lib),
-    title: props.browseRepositoryLinkTitle,
-  } : undefined;
+  const deepLink = props.showBrowseRepositoryLink
+    ? {
+        link: loading
+          ? ''
+          : getBrowserVersionUrl(artifactoryUrl, artifactInfo!!.lib),
+        title: props.browseRepositoryLinkTitle,
+      }
+    : undefined;
 
   return (
     <TabbedCard
