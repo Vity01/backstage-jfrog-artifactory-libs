@@ -24,7 +24,7 @@ function getBrowsePackageUrl(artifactoryUrl: string, lib: LibraryArtifact) {
 }
 
 function getBrowseArtifactUrl(artifactoryUrl: string, lib: LibraryArtifact) {
-  return getBrowseRepoUrl(artifactoryUrl, lib) + '/' + lib.artifact;
+  return getBrowsePackageUrl(artifactoryUrl, lib) + '/' + lib.artifact;
 }
 
 export function getBrowserVersionUrl(

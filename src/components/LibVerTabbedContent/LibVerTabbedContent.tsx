@@ -99,17 +99,19 @@ export const LibVerTabbedContent = ({
 }: LibVerTabbedContentProps) => {
   const tabs: React.JSX.Element[] = [];
   tabs.push(getInfoTab(loading, artifactInfo, artifactoryUrl));
-  if (props.showGradle && isMavenPackageType(props, artifactInfo)) {
-    tabs.push(getGradleTab(artifactInfo));
-  }
-  if (props.showMaven && isMavenPackageType(props, artifactInfo)) {
-    tabs.push(getMavenTab(artifactInfo));
-  }
-  if (props.showSbt && isMavenPackageType(props, artifactInfo)) {
-    tabs.push(getSbtTab(artifactInfo));
-  }
-  if (props.showPip && !isMavenPackageType(props, artifactInfo)) {
-    tabs.push(getPipTab(artifactInfo));
+  if (!loading) {
+    if (props.showGradle && isMavenPackageType(props, artifactInfo)) {
+      tabs.push(getGradleTab(artifactInfo));
+    }
+    if (props.showMaven && isMavenPackageType(props, artifactInfo)) {
+      tabs.push(getMavenTab(artifactInfo));
+    }
+    if (props.showSbt && isMavenPackageType(props, artifactInfo)) {
+      tabs.push(getSbtTab(artifactInfo));
+    }
+    if (props.showPip && !isMavenPackageType(props, artifactInfo)) {
+      tabs.push(getPipTab(artifactInfo));
+    }
   }
 
   const deepLink = props.showBrowseRepositoryLink
