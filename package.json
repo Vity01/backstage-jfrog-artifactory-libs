@@ -92,5 +92,8 @@
     "dist",
     "config.d.ts"
   ],
+  "resolutions": {
+    "@yarnpkg/parsers": "3.0.0-rc.48.1"
+  },
   "configSchema": "config.d.ts"
 }
