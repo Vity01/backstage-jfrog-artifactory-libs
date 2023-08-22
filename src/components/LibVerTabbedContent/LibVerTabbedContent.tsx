@@ -7,8 +7,8 @@ import {
 } from '@backstage/core-components';
 import { LibVerView } from '../LibVerView';
 import React from 'react';
-import { ArtifactInfo } from '../LibArtifactCard/LibArtifactCard';
 import { getBrowserVersionUrl } from '../LibVerView/LibVerView';
+import {ArtifactInfo} from "../LibArtifactCard/api";
 
 export type LibVerTabbedContentProps = {
   props: LibArtifactCardProps;
@@ -17,15 +17,11 @@ export type LibVerTabbedContentProps = {
   artifactInfo: ArtifactInfo | undefined;
 };
 
-function isMavenPackageType(
-  props: LibArtifactCardProps,
-  artifactInfo: ArtifactInfo | undefined,
+function isPackageType(
+    props: LibArtifactCardProps,
+    artifactInfo: ArtifactInfo | undefined, packageType: string = 'maven',
 ) {
-  const b = props.autohideTabs && artifactInfo?.lib?.packageType === 'maven';
-  console.log(
-    'Check autohide with result ' + ' ' + props.autohideTabs + ' ' + b,
-  );
-  return b;
+  return props.autohideTabs && artifactInfo?.lib?.packageType?.toLowerCase() === packageType.toLowerCase();
 }
 
 function getPipTab(artifactInfo: ArtifactInfo | undefined) {
@@ -34,6 +30,18 @@ function getPipTab(artifactInfo: ArtifactInfo | undefined) {
       <CodeSnippet
         language={'plainText'}
         text={artifactInfo?.code.pip || ''}
+        showCopyCodeButton={true}
+      />
+    </CardTab>
+  );
+}
+
+function getDockerfileTab(artifactInfo: ArtifactInfo | undefined) {
+  return (
+    <CardTab label="Dockerfile" key="artifactInfoPyPi">
+      <CodeSnippet
+        language={'dockerfile'}
+        text={`FROM ${artifactInfo?.lib.artifactFullName || artifactInfo?.lib.artifact}:${artifactInfo?.lib.version || 'latest'}`}
         showCopyCodeButton={true}
       />
     </CardTab>
@@ -100,17 +108,20 @@ export const LibVerTabbedContent = ({
   const tabs: React.JSX.Element[] = [];
   tabs.push(getInfoTab(loading, artifactInfo, artifactoryUrl));
   if (!loading) {
-    if (props.showGradle && isMavenPackageType(props, artifactInfo)) {
+    if (props.showGradle && isPackageType(props, artifactInfo, 'maven')) {
       tabs.push(getGradleTab(artifactInfo));
     }
-    if (props.showMaven && isMavenPackageType(props, artifactInfo)) {
+    if (props.showMaven && isPackageType(props, artifactInfo, 'maven')) {
       tabs.push(getMavenTab(artifactInfo));
     }
-    if (props.showSbt && isMavenPackageType(props, artifactInfo)) {
+    if (props.showSbt && isPackageType(props, artifactInfo, 'maven')) {
       tabs.push(getSbtTab(artifactInfo));
     }
-    if (props.showPip && !isMavenPackageType(props, artifactInfo)) {
+    if (props.showPip && isPackageType(props, artifactInfo, 'pypi')) {
       tabs.push(getPipTab(artifactInfo));
+    }
+    if (props.showDockerfile && isPackageType(props, artifactInfo, 'docker')) {
+      tabs.push(getDockerfileTab(artifactInfo));
     }
   }
 

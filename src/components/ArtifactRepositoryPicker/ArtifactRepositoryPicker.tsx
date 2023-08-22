@@ -24,7 +24,7 @@ import useAsync from 'react-use/lib/useAsync';
 import { RepositoryPickerProps, RepositoryPickerUiOptions } from './schema';
 import { configApiRef, useApi } from '@backstage/core-plugin-api';
 import { DEFAULT_PROXY_PATH } from '../LibArtifactCard';
-import { getErrorMessage } from '../LibArtifactCard/LibArtifactCard';
+import {getErrorMessage} from "../LibArtifactCard/api";
 
 export { ArtifactRepositoryPickerSchema } from './schema';
 

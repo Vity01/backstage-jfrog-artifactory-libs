@@ -15,128 +15,14 @@ import {
 } from '../../types';
 import { generatePackageManagersCode } from './codeSnippets';
 import { LibVerTabbedContent } from '../LibVerTabbedContent';
-import { findLatestVersion } from './versionUtils';
 import { Entity } from '@backstage/catalog-model';
-
-export type GeneratedCode = {
-  gradle: string;
-  maven: string;
-  sbt: string;
-  pip: string;
-};
-
-export type ArtifactInfo = {
-  lib: LibraryArtifact;
-  code: GeneratedCode;
-};
-
-export interface JFrogArtifactoryError {
-  status: number;
-  message: string;
-}
-
-export interface Errors {
-  errors: JFrogArtifactoryError[];
-}
-
-export interface RepositoryDetails {
-  key: string;
-  packageType: string;
-  rclass: string;
-}
-
-export interface PropertiesInfo {
-  'pypi.version': string[];
-}
-
-export interface PropsResponse {
-  properties: PropertiesInfo;
-}
-
-export interface VersionsPropsListResponse {
-  results: PropsResponse[];
-}
-
-export async function getErrorMessage(response: Response) {
-  return ((await response.json()) as Errors).errors[0].message;
-}
-
-async function getRepositoryType(
-  fetch: {
-    (input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
-    (input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
-  },
-  url: string,
-  { repo }: LibraryArtifact,
-) {
-  const response = await fetch(`${url}artifactory/api/repositories/${repo}`);
-  if (response.status === 404) {
-    throw new Error(`Repository ${repo} was not found`);
-  } else {
-    if (response.status !== 200) {
-      throw new Error(
-        `Cannot get repository ${repo} detail info ` +
-          (await getErrorMessage(response)),
-      );
-    } else {
-      return (await response.json()) as RepositoryDetails;
-    }
-  }
-}
-
-async function getMavenLatestVersion(
-  fetch: {
-    (input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
-    (input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
-  },
-  url: string,
-  { group, artifact, repo }: LibraryArtifact,
-) {
-  const response = await fetch(
-    `${url}artifactory/api/search/latestVersion?g=${group}&a=${artifact}&repos=${repo}`,
-  );
-  if (response.status === 404) {
-    return undefined;
-  } else {
-    if (response.status !== 200) {
-      throw new Error(
-        `Error getting latest version ` + (await getErrorMessage(response)),
-      );
-    } else {
-      return await response.text();
-    }
-  }
-}
-
-async function getPypiLatestVersion(
-  fetch: {
-    (input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
-    (input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
-  },
-  url: string,
-  { artifact, repo }: LibraryArtifact,
-) {
-  const response = await fetch(
-    `${url}/artifactory/api/search/prop?pypi.name=${artifact}&repos=${repo}`,
-  );
-  if (response.status === 404) {
-    return undefined;
-  } else {
-    if (response.status !== 200) {
-      throw new Error(
-        `Error getting latest version ` + (await getErrorMessage(response)),
-      );
-    } else {
-      const versionPropsListResponse =
-        (await response.json()) as VersionsPropsListResponse;
-      const versions = versionPropsListResponse.results
-        .map(items => items.properties)
-        .map(propertiesInfo => propertiesInfo['pypi.version'][0])
-        .filter(item => item !== undefined);
-      return findLatestVersion(versions);
-    }
-  }
-}
+import {
+  ArtifactInfo,
+  extractArtifactFromFullDockerName,
+  getDockerLatestVersion, getMavenLatestVersion, getPypiLatestVersion,
+  getRepositoryType,
+  removeDockerVersion
+} from "./api";
 
 export const DEFAULT_PROXY_PATH = '/artifactory-proxy/';
 export const LibArtifactCard = (props: LibArtifactCardProps) => {
@@ -184,17 +70,26 @@ export const LibArtifactCard = (props: LibArtifactCardProps) => {
           url,
           entityArtifact,
         );
-        let result;
+        let version;
+        const artInfo = { ...entityArtifact };
         switch (packageType) {
+          case 'docker':
+            const dockerInfo = await getDockerLatestVersion(fetch, url, entityArtifact);
+            artInfo.stats = dockerInfo?.statsDownload;
+            artInfo.size = dockerInfo?.size;
+            artInfo.artifactFullName = removeDockerVersion(artInfo.artifact);
+            artInfo.lastModified = dockerInfo?.lastModified ? new Date(dockerInfo?.lastModified) : undefined;
+            artInfo.artifact = extractArtifactFromFullDockerName(artInfo.artifact);
+            version = dockerInfo?.version;
+            break;
           case 'pypi':
-            result = await getPypiLatestVersion(fetch, url, entityArtifact);
+            version = await getPypiLatestVersion(fetch, url, entityArtifact);
             break;
           default:
-            result = await getMavenLatestVersion(fetch, url, entityArtifact);
+            version = await getMavenLatestVersion(fetch, url, entityArtifact);
         }
 
-        const artInfo = { ...entityArtifact };
-        artInfo.version = result;
+        artInfo.version = version;
         artInfo.packageType = packageType;
 
         setArtifactInfo({
@@ -202,7 +97,7 @@ export const LibArtifactCard = (props: LibArtifactCardProps) => {
           code: generatePackageManagersCode(artInfo, false, false),
         });
         setLoading(false);
-        return result;
+        return version;
       } catch (e) {
         if (e instanceof Error) {
           setError(e);
@@ -237,6 +132,7 @@ LibArtifactCard.defaultProps = {
   showMaven: true, // whether to  show Maven package manager tab
   showSbt: true, // whether to  show Sbt package manager tab
   showPip: true, // whether to  show Pip package manager tab
+  showDockerfile: true, // whether to  show Dockerfile tab
   // it hides Maven and Gradle tabs if the current repository package type is `PyPi`
   autohideTabs: true,
   showBrowseRepositoryLink: true, // whether to show Browse to URL deep link under bottom of the Card

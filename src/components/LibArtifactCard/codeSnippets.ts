@@ -1,5 +1,5 @@
-import { GeneratedCode } from './LibArtifactCard';
 import { LibraryArtifact } from '../../types';
+import {GeneratedCode} from "./api";
 
 function removeScalaVersion(artifactName: string) {
   const underscorePos = artifactName.lastIndexOf('_');

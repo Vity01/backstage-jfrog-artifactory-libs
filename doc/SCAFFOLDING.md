@@ -81,7 +81,7 @@ jfrogArtifactoryRepo:
     allowArbitraryValues: true
     excludedRegex: ['/legacyRepoName/i']
     allowedTypes: ['virtual']
-    allowedPackageTypes: ['maven', 'pypi']
+    allowedPackageTypes: ['maven', 'pypi', 'docker']
   ui:help: 'Example - maven-local'
   examples:
     - 'maven-local'

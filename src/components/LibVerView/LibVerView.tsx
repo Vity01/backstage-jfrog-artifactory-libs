@@ -3,6 +3,7 @@ import { AboutField } from '@backstage/plugin-catalog';
 import React from 'react';
 import { LibraryArtifact } from '../../types';
 import { Link } from '@backstage/core-components';
+import { formatDate, formatSize } from '../LibArtifactCard/utils';
 
 export const ARTIFACTORY_BROWSE_URL = 'artifactory/list';
 
@@ -16,11 +17,9 @@ function getBrowseRepoUrl(artifactoryUrl: string, lib: LibraryArtifact) {
 }
 
 function getBrowsePackageUrl(artifactoryUrl: string, lib: LibraryArtifact) {
-  return (
-    getBrowseRepoUrl(artifactoryUrl, lib) +
-    '/' +
-    lib.group?.replaceAll('.', '/')
-  );
+  return getBrowseRepoUrl(artifactoryUrl, lib) + (lib.group
+    ? '/' + lib.group?.replaceAll('.', '/')
+    : '');
 }
 
 function getBrowseArtifactUrl(artifactoryUrl: string, lib: LibraryArtifact) {
@@ -55,7 +54,7 @@ export const LibVerView = ({ lib, artifactoryUrl }: LibVerViewProps) => {
         label={'Artifact'}
         children={
           <Link to={getBrowseArtifactUrl(artifactoryUrl, lib)} target="_blank">
-            {lib.artifact}
+            {lib.artifactFullName || lib.artifact}
           </Link>
         }
       />
@@ -75,9 +74,20 @@ export const LibVerView = ({ lib, artifactoryUrl }: LibVerViewProps) => {
           </Link>
         }
       />
+      {lib.size && <AboutField label={'Size'} value={formatSize(lib.size)} />}
+      {lib.lastModified && (
+        <AboutField
+          label={'Last Modified'}
+          value={formatDate(lib.lastModified)}
+        />
+      )}
+
       {lib.scope && <AboutField label={'Scope'} value={lib.scope} />}
       {lib.packaging && (
         <AboutField label={'Packaging'} value={lib.packaging} />
+      )}
+      {lib.stats && (
+        <AboutField label={'Download Count'} value={String(lib.stats)} />
       )}
     </Grid>
   );
