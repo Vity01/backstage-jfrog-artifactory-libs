@@ -152,7 +152,7 @@ export async function getDockerLatestVersion(
     } else {
         if (!response.ok) {
             throw new Error(
-                `Error getting latest version ` + (await getErrorMessage(response)),
+                `Error getting latest version ` + (await response.text()),
             );
         } else {
             const metadataResponse =

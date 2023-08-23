@@ -63,7 +63,7 @@ Set up a proxy for the JFrog API by adding the following configuration to your `
     target: 'https://your-jfrog-artifactory-instance.com'
     headers:
       # if you use Jfrog instance for anonymous user token is not required, but it is also required for Docker package type
-      Authorization: 'Bearer ${ARTIFACTORY_TOKEN}'
+      Authorization: Bearer ${ARTIFACTORY_TOKEN}
       X-Result-Detail: 'properties'
       Accept: '*'
 ```
