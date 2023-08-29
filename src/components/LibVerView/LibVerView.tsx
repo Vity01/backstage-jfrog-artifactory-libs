@@ -17,24 +17,23 @@ function getBrowseRepoUrl(artifactoryUrl: string, lib: LibraryArtifact) {
 }
 
 function getBrowsePackageUrl(artifactoryUrl: string, lib: LibraryArtifact) {
-  return getBrowseRepoUrl(artifactoryUrl, lib) + (lib.group
-    ? '/' + lib.group?.replaceAll('.', '/')
-    : '');
+  return (
+    getBrowseRepoUrl(artifactoryUrl, lib) +
+    (lib.group ? `/${lib.group?.replaceAll('.', '/')}` : '')
+  );
 }
 
 function getBrowseArtifactUrl(artifactoryUrl: string, lib: LibraryArtifact) {
-  return getBrowsePackageUrl(artifactoryUrl, lib) + '/' + lib.artifact;
+  return `${getBrowsePackageUrl(artifactoryUrl, lib)}/${lib.artifact}`;
 }
 
 export function getBrowserVersionUrl(
   artUrl: string,
   lib: LibraryArtifact,
 ): string {
-  return (
-    getBrowseArtifactUrl(artUrl, lib) +
-    '/' +
-    (lib.version !== undefined ? lib.version : '')
-  );
+  return `${getBrowseArtifactUrl(artUrl, lib)}/${
+    lib.version !== undefined ? lib.version : ''
+  }`;
 }
 
 export const LibVerView = ({ lib, artifactoryUrl }: LibVerViewProps) => {
@@ -42,7 +41,7 @@ export const LibVerView = ({ lib, artifactoryUrl }: LibVerViewProps) => {
     <Grid container>
       {lib.group && (
         <AboutField
-          label={'Group'}
+          label="Group"
           children={
             <Link to={getBrowsePackageUrl(artifactoryUrl, lib)} target="_blank">
               {lib.group}
@@ -51,7 +50,7 @@ export const LibVerView = ({ lib, artifactoryUrl }: LibVerViewProps) => {
         />
       )}
       <AboutField
-        label={'Artifact'}
+        label="Artifact"
         children={
           <Link to={getBrowseArtifactUrl(artifactoryUrl, lib)} target="_blank">
             {lib.artifactFullName || lib.artifact}
@@ -59,7 +58,7 @@ export const LibVerView = ({ lib, artifactoryUrl }: LibVerViewProps) => {
         }
       />
       <AboutField
-        label={'Version'}
+        label="Version"
         children={
           <Link to={getBrowserVersionUrl(artifactoryUrl, lib)} target="_blank">
             {lib.version || '?'}
@@ -67,27 +66,25 @@ export const LibVerView = ({ lib, artifactoryUrl }: LibVerViewProps) => {
         }
       />
       <AboutField
-        label={'Repo'}
+        label="Repo"
         children={
           <Link to={getBrowseRepoUrl(artifactoryUrl, lib)} target="_blank">
             {lib.repo}
           </Link>
         }
       />
-      {lib.size && <AboutField label={'Size'} value={formatSize(lib.size)} />}
+      {lib.size && <AboutField label="Size" value={formatSize(lib.size)} />}
       {lib.lastModified && (
         <AboutField
-          label={'Last Modified'}
+          label="Last Modified"
           value={formatDate(lib.lastModified)}
         />
       )}
 
-      {lib.scope && <AboutField label={'Scope'} value={lib.scope} />}
-      {lib.packaging && (
-        <AboutField label={'Packaging'} value={lib.packaging} />
-      )}
-      {lib.stats && (
-        <AboutField label={'Download Count'} value={String(lib.stats)} />
+      {lib.scope && <AboutField label="Scope" value={lib.scope} />}
+      {lib.packaging && <AboutField label="Packaging" value={lib.packaging} />}
+      {lib.stats !== undefined && (
+        <AboutField label="Download Count" value={String(lib.stats)} />
       )}
     </Grid>
   );
