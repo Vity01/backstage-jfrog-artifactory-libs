@@ -83,15 +83,16 @@ Artifact details are correlated to Backstage entities using an annotation added 
 
 ```yaml
   metadata:
-    # -- required values --
-    jfrog.com/artifactory-artifact: 'artifact-name'
-    jfrog.com/artifactory-repo: 'maven-local'
-
-    jfrog.com/artifactory-group: 'com.mycompany' # optional string - can be blank for pypi, necessary for Maven repos
-
-    # -- optional values --
-    jfrog.com/artifactory-scope: 'compile' # optional string, one of these [compile, test,provided,runtime,classpath,optional]
-    jfrog.com/artifactory-packaging: 'aar' #optional string, eg. `aar` 
+    annotations:
+      # -- required values --
+      jfrog.com/artifactory-artifact: 'artifact-name'
+      jfrog.com/artifactory-repo: 'maven-local'
+  
+      jfrog.com/artifactory-group: 'com.mycompany' # optional string - can be blank for pypi, necessary for Maven repos
+  
+      # -- optional values --
+      jfrog.com/artifactory-scope: 'compile' # optional string, one of these [compile, test,provided,runtime,classpath,optional]
+      jfrog.com/artifactory-packaging: 'aar' #optional string, eg. `aar` 
 
 ```
 
@@ -101,9 +102,10 @@ you navigate to the entity page where it's included.
 For a docker image you define repository and artifact name. Both formats are supported:
 ```yaml
   metadata:
-    # -- required values --
-    jfrog.com/artifactory-artifact: 'docker.mydomain.com/mygroup/my/artifact-name' # or simply 'mygroup/my/artifact-name' 
-    jfrog.com/artifactory-repo: 'docker-local'
+    annotations:
+      # -- required values --
+      jfrog.com/artifactory-artifact: 'docker.mydomain.com/mygroup/my/artifact-name' # or simply 'mygroup/my/artifact-name' 
+      jfrog.com/artifactory-repo: 'docker-local'
 ```
 
 ![Demo](./doc/dockerfile.gif)
