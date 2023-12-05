@@ -1,4 +1,5 @@
-import { Entity } from '@backstage/catalog-model';
+import { CompoundEntityRef, Entity } from '@backstage/catalog-model';
+import { ArtifactInfo } from './components/LibArtifactCard/api';
 
 export const ENTITY_GROUP = 'jfrog.com/artifactory-group';
 export const ENTITY_ARTIFACT = 'jfrog.com/artifactory-artifact';
@@ -12,7 +13,7 @@ export const isJfrogArtifactAvailable = (entity: Entity) =>
 export const isJfrogRepoAvailable = (entity: Entity) =>
   Boolean(entity.metadata.annotations?.[ENTITY_REPO]);
 
-export interface LibArtifactCardProps {
+export type LibArtifactCardProps = {
   title: string;
   showGradle: boolean;
   showMaven: boolean;
@@ -22,6 +23,22 @@ export interface LibArtifactCardProps {
   autohideTabs: boolean;
   showBrowseRepositoryLink: boolean;
   browseRepositoryLinkTitle: string;
+  browseLink: (
+    artifactoryLink: string,
+    artifactInfos: ArtifactInfo[] | undefined,
+  ) => string;
+};
+
+export interface LibverTableRow {
+  entity: Entity;
+  resolved: {
+    name: string;
+    partOfSystemRelationTitle?: string;
+    partOfSystemRelations: CompoundEntityRef[];
+    ownedByRelationsTitle?: string;
+    ownedByRelations: CompoundEntityRef[];
+    artifactInfo?: ArtifactInfo;
+  };
 }
 
 export type LibraryArtifact = {
@@ -39,7 +56,6 @@ export type LibraryArtifact = {
   stats?: number;
   lastModified?: Date;
 };
-
 
 export interface MetadataResponse {
   data: Data;

@@ -18,3 +18,5 @@ export {
   type RepositoryPickerUiOptions,
 } from './schema';
 export { ArtifactRepositoryPicker } from './ArtifactRepositoryPicker';
+export type * from './ArtifactRepositoryPicker'
+export type * from './schema'

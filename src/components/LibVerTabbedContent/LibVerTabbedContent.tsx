@@ -7,94 +7,135 @@ import {
 } from '@backstage/core-components';
 import { LibVerView } from '../LibVerView';
 import React from 'react';
-import { getBrowserVersionUrl } from '../LibVerView/LibVerView';
-import {ArtifactInfo} from "../LibArtifactCard/api";
+import { ArtifactInfo } from '../LibArtifactCard/api';
+import { Divider, makeStyles } from '@material-ui/core';
+import { ClassNameMap } from '@material-ui/core/styles/withStyles';
+
+const useStyles = makeStyles({
+  dividerMargin: {
+    margin: '0.75em 0 1em 0',
+  },
+});
 
 export type LibVerTabbedContentProps = {
   props: LibArtifactCardProps;
   loading: boolean;
   artifactoryUrl: string;
-  artifactInfo: ArtifactInfo | undefined;
+  artifactInfo: ArtifactInfo[] | undefined;
 };
 
 function isPackageType(
-    props: LibArtifactCardProps,
-    artifactInfo: ArtifactInfo | undefined, packageType: string = 'maven',
+  props: LibArtifactCardProps,
+  artifactInfo: ArtifactInfo[] | undefined,
+  packageType: string,
 ) {
-  return props.autohideTabs && artifactInfo?.lib?.packageType?.toLowerCase() === packageType.toLowerCase();
+  return (
+    !props.autohideTabs ||
+    (props.autohideTabs &&
+      artifactInfo?.some(
+        value =>
+          value.lib.packageType?.toLowerCase() === packageType.toLowerCase(),
+      ))
+  );
 }
 
-function getPipTab(artifactInfo: ArtifactInfo | undefined) {
+function getPipTab(artifactInfo: ArtifactInfo[] | undefined) {
   return (
     <CardTab label="Pip" key="artifactInfoPyPi">
       <CodeSnippet
-        language={'plainText'}
-        text={artifactInfo?.code.pip || ''}
-        showCopyCodeButton={true}
+        language="plainText"
+        text={artifactInfo?.map(item => item.code().pip).join('\n') || ''}
+        showCopyCodeButton
       />
     </CardTab>
   );
 }
 
-function getDockerfileTab(artifactInfo: ArtifactInfo | undefined) {
+function getDockerfileTab(artifactInfo: ArtifactInfo[] | undefined) {
   return (
-    <CardTab label="Dockerfile" key="artifactInfoPyPi">
+    <CardTab label="Dockerfile" key="artifactInfoDockerfile">
       <CodeSnippet
-        language={'dockerfile'}
-        text={`FROM ${artifactInfo?.lib.artifactFullName || artifactInfo?.lib.artifact}:${artifactInfo?.lib.version || 'latest'}`}
-        showCopyCodeButton={true}
+        customStyle={{ flexGrow: 1, minHeight: '50vh' }}
+        language="dockerfile"
+        text={
+          artifactInfo
+            ?.map(
+              item =>
+                `FROM ${item?.lib.artifactFullName || item?.lib.artifact}:${
+                  item?.lib.version || 'latest'
+                }`,
+            )
+            .join('\n') || ''
+        }
+        showCopyCodeButton
       />
     </CardTab>
   );
 }
 
-function getSbtTab(artifactInfo: ArtifactInfo | undefined) {
+function getSbtTab(artifactInfo: ArtifactInfo[] | undefined) {
   return (
     <CardTab label="Sbt" key="artifactInfoSbt">
       <CodeSnippet
-        language={'plainText'}
-        text={artifactInfo?.code.sbt || ''}
-        showCopyCodeButton={true}
+        language="plainText"
+        text={artifactInfo?.map(item => item.code().sbt).join('\n') || ''}
+        showCopyCodeButton
       />
     </CardTab>
   );
 }
 
-function getMavenTab(artifactInfo: ArtifactInfo | undefined) {
+function getMavenTab(artifactInfo: ArtifactInfo[] | undefined) {
   return (
-    <CardTab label={'Maven'} key="artifactInfoMaven" hidden={true}>
+    <CardTab label="Maven" key="artifactInfoMaven" hidden>
       <CodeSnippet
-        language={'xml'}
-        text={artifactInfo?.code.maven || ''}
-        showCopyCodeButton={true}
+        language="xml"
+        text={artifactInfo?.map(item => item.code().maven).join('\n') || ''}
+        showCopyCodeButton
       />
     </CardTab>
   );
 }
 
-function getGradleTab(artifactInfo: ArtifactInfo | undefined) {
+function getGradleTab(artifactInfo: ArtifactInfo[] | undefined) {
   return (
-    <CardTab label="Gradle" key="artifactInfoGradle" hidden={true}>
+    <CardTab label="Gradle" key="artifactInfoGradle" hidden>
       <CodeSnippet
-        language={'groovy'}
-        text={artifactInfo?.code.gradle || ''}
-        showCopyCodeButton={true}
+        language="groovy"
+        text={artifactInfo?.map(item => item.code().gradle).join('\n') || ''}
+        showCopyCodeButton
       />
     </CardTab>
   );
 }
 
-function getInfoTab(
+export function infoTab(
   loading: boolean,
-  artifactInfo: ArtifactInfo | undefined,
+  artifactInfo: ArtifactInfo[],
   artifactoryUrl: string,
-) {
+  classes: ClassNameMap,
+): React.JSX.Element {
   return (
     <CardTab label="Info" key="artifactInfo">
       {loading && <Progress />}
-      {!loading && (
-        <LibVerView artifactoryUrl={artifactoryUrl} lib={artifactInfo!!.lib} />
-      )}
+      {!loading &&
+        artifactInfo.map(item => {
+          return (
+            <>
+              <LibVerView
+                key={`LibVerView${item.lib.artifact}`}
+                artifactoryUrl={artifactoryUrl}
+                lib={item.lib}
+              />
+              {item !== artifactInfo[artifactInfo.length - 1] && (
+                <Divider
+                  classes={{ root: classes.dividerMargin }}
+                  key={`Divider${item.lib.artifact}`}
+                />
+              )}
+            </>
+          );
+        })}
     </CardTab>
   );
 }
@@ -106,7 +147,10 @@ export const LibVerTabbedContent = ({
   artifactInfo,
 }: LibVerTabbedContentProps) => {
   const tabs: React.JSX.Element[] = [];
-  tabs.push(getInfoTab(loading, artifactInfo, artifactoryUrl));
+  const classes = useStyles();
+  if (artifactInfo && artifactInfo.length > 0) {
+    tabs.push(infoTab(loading, artifactInfo, artifactoryUrl, classes));
+  }
   if (!loading) {
     if (props.showGradle && isPackageType(props, artifactInfo, 'maven')) {
       tabs.push(getGradleTab(artifactInfo));
@@ -127,9 +171,7 @@ export const LibVerTabbedContent = ({
 
   const deepLink = props.showBrowseRepositoryLink
     ? {
-        link: loading
-          ? ''
-          : getBrowserVersionUrl(artifactoryUrl, artifactInfo!!.lib),
+        link: loading ? '' : props.browseLink(artifactoryUrl, artifactInfo),
         title: props.browseRepositoryLinkTitle,
       }
     : undefined;

@@ -10,7 +10,7 @@ export type GeneratedCode = {
 
 export type ArtifactInfo = {
   lib: LibraryArtifact;
-  code: GeneratedCode;
+  code: () => GeneratedCode;
 };
 
 export interface JFrogArtifactoryError {
@@ -121,14 +121,13 @@ export function removeDockerVersion(artifact: string): string {
 
 export function extractArtifactFromFullDockerName(artifact: string): string {
   // remove domain path
-  // eslint-disable-next-line no-param-reassign
-  artifact = removeDockerVersion(artifact);
-  const dotPosition = artifact.lastIndexOf('.');
-  const slashPosition = artifact.indexOf('/');
+  const artifactWithoutVersion = removeDockerVersion(artifact);
+  const dotPosition = artifactWithoutVersion.lastIndexOf('.');
+  const slashPosition = artifactWithoutVersion.indexOf('/');
   if (dotPosition >= 0 && dotPosition < slashPosition) {
-    return artifact.substring(slashPosition + 1);
+    return artifactWithoutVersion.substring(slashPosition + 1);
   }
-  return artifact;
+  return artifactWithoutVersion;
 }
 
 export async function getDockerLatestVersion(

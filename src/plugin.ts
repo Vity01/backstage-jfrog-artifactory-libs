@@ -22,7 +22,8 @@ import {
 import { rootRouteRef } from './routes';
 import { scaffolderPlugin } from '@backstage/plugin-scaffolder';
 import { createScaffolderFieldExtension } from '@backstage/plugin-scaffolder-react';
-import { ArtifactRepositoryPicker } from './components/ArtifactRepositoryPicker';
+import { ArtifactRepositoryPicker } from './components';
+// noinspection ES6PreferShortImport
 import { ArtifactRepositoryPickerSchema } from './components/ArtifactRepositoryPicker/schema';
 
 export const jfrogArtifactoryLibsPlugin = createPlugin({
@@ -32,7 +33,7 @@ export const jfrogArtifactoryLibsPlugin = createPlugin({
   },
 });
 
-export const LibArtifactCard = jfrogArtifactoryLibsPlugin.provide(
+export const JFrogLibArtifactCard = jfrogArtifactoryLibsPlugin.provide(
   createComponentExtension({
     name: 'LibArtifactCard',
     component: {
@@ -42,7 +43,7 @@ export const LibArtifactCard = jfrogArtifactoryLibsPlugin.provide(
   }),
 );
 
-export const JfrogArtifactoryLibsPage = jfrogArtifactoryLibsPlugin.provide(
+export const JFrogArtifactoryLibsPage = jfrogArtifactoryLibsPlugin.provide(
   createRoutableExtension({
     name: 'JfrogArtifactoryLibsPage',
     component: () =>
@@ -51,6 +52,27 @@ export const JfrogArtifactoryLibsPage = jfrogArtifactoryLibsPlugin.provide(
   }),
 );
 
+export const JFrogLibVerPage = jfrogArtifactoryLibsPlugin.provide(
+  createComponentExtension({
+    name: 'LibVerPage',
+    component: {
+      lazy: () =>
+        import('./components/LibverPage/LibverPage').then(m => m.LibverPage),
+    },
+  }),
+);
+
+export const JFrogLibVerPageContent = jfrogArtifactoryLibsPlugin.provide(
+  createComponentExtension({
+    name: 'LibVerPageContent',
+    component: {
+      lazy: () =>
+        import('./components/LibverPage/LibverPage').then(
+          m => m.LibverPageContent,
+        ),
+    },
+  }),
+);
 /**
  * A field extension for selecting an Entity that exists in the Catalog.
  *

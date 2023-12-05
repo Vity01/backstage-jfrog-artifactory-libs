@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /*
  * Copyright 2021 The Backstage Authors
  *
@@ -24,7 +25,7 @@ import useAsync from 'react-use/lib/useAsync';
 import { RepositoryPickerProps, RepositoryPickerUiOptions } from './schema';
 import { configApiRef, useApi } from '@backstage/core-plugin-api';
 import { DEFAULT_PROXY_PATH } from '../LibArtifactCard';
-import {getErrorMessage} from "../LibArtifactCard/api";
+import { getErrorMessage } from '../LibArtifactCard/api';
 
 export { ArtifactRepositoryPickerSchema } from './schema';
 
@@ -34,7 +35,9 @@ export { ArtifactRepositoryPickerSchema } from './schema';
  *
  * @public
  */
-export const ArtifactRepositoryPicker = (props: RepositoryPickerProps) => {
+export const ArtifactRepositoryPicker: (
+  props: RepositoryPickerProps,
+) => React.JSX.Element = (props: RepositoryPickerProps) => {
   const {
     onChange,
     schema: { title = 'Artifact repository', description = 'Repository key' },
@@ -63,7 +66,7 @@ export const ArtifactRepositoryPicker = (props: RepositoryPickerProps) => {
     const response = await fetch(url);
     if (response.status !== 200) {
       throw new Error(
-        `Cannot get repositories list - ` + (await getErrorMessage(response)),
+        `Cannot get repositories list - ${await getErrorMessage(response)}`,
       );
     }
 

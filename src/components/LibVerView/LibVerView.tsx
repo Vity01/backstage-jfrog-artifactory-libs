@@ -17,13 +17,15 @@ function getBrowseRepoUrl(artifactoryUrl: string, lib: LibraryArtifact) {
 }
 
 function getBrowsePackageUrl(artifactoryUrl: string, lib: LibraryArtifact) {
-  return (
-    getBrowseRepoUrl(artifactoryUrl, lib) +
-    (lib.group ? `/${lib.group?.replaceAll('.', '/')}` : '')
-  );
+  return `${getBrowseRepoUrl(artifactoryUrl, lib)}${
+    lib.group ? `/${lib.group?.replaceAll('.', '/')}` : ''
+  }`;
 }
 
-function getBrowseArtifactUrl(artifactoryUrl: string, lib: LibraryArtifact) {
+export function getBrowseArtifactUrl(
+  artifactoryUrl: string,
+  lib: LibraryArtifact,
+) {
   return `${getBrowsePackageUrl(artifactoryUrl, lib)}/${lib.artifact}`;
 }
 

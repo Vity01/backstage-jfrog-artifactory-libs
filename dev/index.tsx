@@ -14,17 +14,14 @@
  * limitations under the License.
  */
 import React from 'react';
-import { createDevApp } from '@backstage/dev-utils';
-import {
-  jfrogArtifactoryLibsPlugin,
-  JfrogArtifactoryLibsPage,
-} from '../src/plugin';
+import {createDevApp} from '@backstage/dev-utils';
+import {JFrogArtifactoryLibsPage, jfrogArtifactoryLibsPlugin} from '../src';
 
 createDevApp()
   .registerPlugin(jfrogArtifactoryLibsPlugin)
   .addPage({
-    element: <JfrogArtifactoryLibsPage />,
+    element: <JFrogArtifactoryLibsPage />,
     title: 'Root Page',
-    path: '/jfrog-artifactory-libs',
+    path: '/jfrog-artifactory-libs'
   })
   .render();

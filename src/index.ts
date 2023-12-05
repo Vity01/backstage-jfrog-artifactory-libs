@@ -13,11 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-export {
-  jfrogArtifactoryLibsPlugin,
-  JfrogArtifactoryLibsPage,
-  LibArtifactCard,
-  ArtifactRepositoryPickerFieldExtension,
-} from './plugin';
-
+export * from './plugin';
 export * from './types';
+export * from './components';

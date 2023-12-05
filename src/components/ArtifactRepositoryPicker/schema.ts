@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 import { z } from 'zod';
-import { makeFieldSchemaFromZod } from '@backstage/plugin-scaffolder';
+import {CustomFieldExtensionSchema, makeFieldSchemaFromZod} from '@backstage/plugin-scaffolder';
 
 /**
  * @public
@@ -97,7 +97,7 @@ export type RepositoryPickerUiOptions =
 
 export type RepositoryPickerProps = typeof RepositoryPickerFieldSchema.type;
 
-export const ArtifactRepositoryPickerSchema =
+export const ArtifactRepositoryPickerSchema: CustomFieldExtensionSchema =
   RepositoryPickerFieldSchema.schema;
 
 export type RepositoryPickerFilterQuery = z.TypeOf<
