@@ -1,6 +1,9 @@
 import { Entity } from '@backstage/catalog-model';
 
 import { Config } from '@backstage/config';
+
+import { IdentityApi } from '@backstage/core-plugin-api';
+
 import {
   ENTITY_ARTIFACT,
   ENTITY_GROUP,
@@ -43,6 +46,7 @@ export function checkAnnotationsPresent(entity: Entity) {
 export async function libraryInfo(
   entity: Entity,
   config: Config,
+  identity: IdentityApi,
 ): Promise<ArtifactInfo> {
   const artifactoryBackendProxy =
     config.getOptionalString('jfrog.artifactory.proxyPath') ||
@@ -53,8 +57,7 @@ export async function libraryInfo(
   const proxyUrl = `/proxy${artifactoryBackendProxy}`;
   //    try {
   const url = `${backendUrl}/api${proxyUrl}`;
-
-  const { packageType } = await getRepositoryType(fetch, url, entityArtifact);
+  const { packageType } = await getRepositoryType(fetch, url, entityArtifact,identity);
   let version;
   const artInfo = { ...entityArtifact };
   switch (packageType) {
@@ -63,6 +66,7 @@ export async function libraryInfo(
         fetch,
         url,
         entityArtifact,
+        identity,
       );
       artInfo.stats = dockerInfo?.statsDownload;
       artInfo.size = dockerInfo?.size;
@@ -74,10 +78,10 @@ export async function libraryInfo(
       version = dockerInfo?.version;
       break;
     case 'pypi':
-      version = await getPypiLatestVersion(fetch, url, entityArtifact);
+      version = await getPypiLatestVersion(fetch, url, entityArtifact,identity);
       break;
     default:
-      version = await getMavenLatestVersion(fetch, url, entityArtifact);
+      version = await getMavenLatestVersion(fetch, url, entityArtifact,identity);
   }
 
   artInfo.version = version;

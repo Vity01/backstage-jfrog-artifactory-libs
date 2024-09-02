@@ -1,5 +1,5 @@
 import React from 'react';
-import { configApiRef, useApi } from '@backstage/core-plugin-api';
+import { configApiRef, identityApiRef, useApi } from '@backstage/core-plugin-api';
 import { ResponseErrorPanel } from '@backstage/core-components';
 import { useEntity } from '@backstage/plugin-catalog-react';
 import { LibArtifactCardProps } from '../../types';
@@ -14,6 +14,7 @@ export const DEFAULT_PROXY_PATH = '/artifactory-proxy/';
 export const LibArtifactCard = (props: LibArtifactCardProps) => {
   const config = useApi(configApiRef);
   const { entity } = useEntity<Entity>();
+  const identity = useApi (identityApiRef);
 
   const artifactoryUrl = config.getString('jfrog.artifactory.url');
 
@@ -21,7 +22,7 @@ export const LibArtifactCard = (props: LibArtifactCardProps) => {
 
   const { value, loading, error } = useAsync(async () => {
     try {
-      return await libraryInfo(entity, config);
+      return await libraryInfo(entity, config, identity);
     } catch (e) {
       if (!(e instanceof Error)) {
         throw new Error(e as string);
