@@ -1,5 +1,7 @@
+// import { on } from 'events';
 import { LibraryArtifact, MetadataResponse } from '../../types';
 import { findLatestVersion } from './versionUtils';
+import { IdentityApi } from '@backstage/core-plugin-api';
 
 export type GeneratedCode = {
   gradle: string;
@@ -51,8 +53,17 @@ export async function getRepositoryType(
   },
   url: string,
   { repo }: LibraryArtifact,
+  identityApi: IdentityApi
 ) {
-  const response = await fetch(`${url}artifactory/api/repositories/${repo}`);
+  // Obtain the token
+
+  const { token: idToken } = await identityApi.getCredentials();
+
+  const response = await fetch(`${url}artifactory/api/repositories/${repo}`, {
+    headers: {
+      Authorization: `Bearer ${idToken}`,
+    },
+  });
   if (response.status === 404) {
     throw new Error(`Repository ${repo} was not found`);
   } else {
@@ -75,9 +86,16 @@ export async function getMavenLatestVersion(
   },
   url: string,
   { group, artifact, repo }: LibraryArtifact,
+  identityApi: IdentityApi,
 ) {
+
+  const { token: idToken } = await identityApi.getCredentials();
+
   const response = await fetch(
-    `${url}artifactory/api/search/latestVersion?g=${group}&a=${artifact}&repos=${repo}`,
+    `${url}artifactory/api/search/latestVersion?g=${group}&a=${artifact}&repos=${repo}`, {
+      headers: {
+        Authorization: `Bearer ${idToken}`,
+      },}
   );
   if (response.status === 404) {
     return undefined;
@@ -137,10 +155,14 @@ export async function getDockerLatestVersion(
   },
   url: string,
   { artifact }: LibraryArtifact,
+  identityApi: IdentityApi,
 ) {
+  const { token: idToken } = await identityApi.getCredentials();
+
   const response = await fetch(`${url}/metadata/api/v1/query`, {
     headers: {
       'Content-Type': 'application/json',
+      Authorization: `Bearer ${idToken}`,
     },
     method: 'POST',
     body: getMetadataVersionQuery(extractArtifactFromFullDockerName(artifact)),
@@ -174,9 +196,15 @@ export async function getPypiLatestVersion(
   },
   url: string,
   { artifact, repo }: LibraryArtifact,
+  identityApi: IdentityApi,
 ) {
+  const { token: idToken } = await identityApi.getCredentials();
+
   const response = await fetch(
-    `${url}/artifactory/api/search/prop?pypi.name=${artifact}&repos=${repo}`,
+    `${url}/artifactory/api/search/prop?pypi.name=${artifact}&repos=${repo}`, {
+      headers: {
+        Authorization: `Bearer ${idToken}`,
+      },}
   );
   if (response.status === 404) {
     return undefined;

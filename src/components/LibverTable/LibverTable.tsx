@@ -21,7 +21,7 @@ import { capitalize } from 'lodash';
 import React, { ReactNode, useMemo, useRef, useState } from 'react';
 import { columnFactories } from './columns';
 import pluralize from 'pluralize';
-import { ConfigApi, configApiRef, useApi } from '@backstage/core-plugin-api';
+import { ConfigApi, configApiRef, useApi, identityApiRef, IdentityApi } from '@backstage/core-plugin-api';
 import useAsync from 'react-use/lib/useAsync';
 import { LibVerTabbedContent } from '../LibVerTabbedContent';
 import { ArtifactInfo } from '../LibArtifactCard/api';
@@ -56,6 +56,7 @@ const refCompare = (a: LibverTableRow, b: LibverTableRow) => {
 async function loadEntityItemData(
   entity: Entity,
   config: ConfigApi,
+  identity: IdentityApi,
 ): Promise<LibverTableRow> {
   const partOfSystemRelations = getEntityRelations(entity, RELATION_PART_OF, {
     kind: 'system',
@@ -64,7 +65,7 @@ async function loadEntityItemData(
 
   let artifactInfo;
   try {
-    artifactInfo = await libraryInfo(entity, config);
+    artifactInfo = await libraryInfo(entity, config, identity);
   } catch (e) {
     console.error(e);
     artifactInfo = undefined;
@@ -107,6 +108,7 @@ function TableComponent(
   const [rows, setRows] = useState<LibverTableRow[]>([]);
   const [selectedRows, setSelectedRows] = useState<ArtifactInfo[]>([]);
   const config = useApi(configApiRef);
+  const identity = useApi(identityApiRef);
   const tableRef = useRef<any>(); // not sure if there's a better type for this
 
   const artifactoryUrl = useMemo(() => {
@@ -116,7 +118,7 @@ function TableComponent(
   const { loading, error } = useAsync(async () => {
     const results: LibverTableRow[] = [];
     const libverTableRows = await Promise.allSettled(
-      entities.map(entity => loadEntityItemData(entity, config)),
+      entities.map(entity => loadEntityItemData(entity, config, identity)),
     );
     libverTableRows.forEach(result => {
       if (result.status === 'fulfilled') {
