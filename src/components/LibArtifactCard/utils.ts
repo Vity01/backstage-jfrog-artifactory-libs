@@ -2,6 +2,7 @@ export function formatDate(date: Date): string {
   if (!date) {
     return 'N/A';
   }
+  // eslint-disable-next-line new-cap
   const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   const options: Intl.DateTimeFormatOptions = {
     timeZone,

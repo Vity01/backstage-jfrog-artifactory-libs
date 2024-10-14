@@ -1,5 +1,5 @@
 import React from 'react';
-import { configApiRef, identityApiRef, useApi } from '@backstage/core-plugin-api';
+import { configApiRef, fetchApiRef, useApi } from '@backstage/core-plugin-api';
 import { ResponseErrorPanel } from '@backstage/core-components';
 import { useEntity } from '@backstage/plugin-catalog-react';
 import { LibArtifactCardProps } from '../../types';
@@ -13,8 +13,8 @@ import { ArtifactInfo } from './api';
 export const DEFAULT_PROXY_PATH = '/artifactory-proxy/';
 export const LibArtifactCard = (props: LibArtifactCardProps) => {
   const config = useApi(configApiRef);
+  const fetchApi = useApi(fetchApiRef);
   const { entity } = useEntity<Entity>();
-  const identity = useApi (identityApiRef);
 
   const artifactoryUrl = config.getString('jfrog.artifactory.url');
 
@@ -22,7 +22,7 @@ export const LibArtifactCard = (props: LibArtifactCardProps) => {
 
   const { value, loading, error } = useAsync(async () => {
     try {
-      return await libraryInfo(entity, config, identity);
+      return await libraryInfo(entity, config, fetchApi);
     } catch (e) {
       if (!(e instanceof Error)) {
         throw new Error(e as string);
@@ -65,6 +65,9 @@ LibArtifactCard.defaultProps = {
   showMaven: true, // whether to  show Maven package manager tab
   showSbt: true, // whether to  show Sbt package manager tab
   showPip: true, // whether to  show Pip package manager tab
+  showNpm: true, // whether to  show Npm package manager tab
+  showYarn: true, // whether to  show Npm package manager tab
+  showNuget: true, // whether to  show Nuget package manager tab
   showDockerfile: true, // whether to  show Dockerfile tab
   // it hides Maven and Gradle tabs if the current repository package type is `PyPi`
   autohideTabs: true,

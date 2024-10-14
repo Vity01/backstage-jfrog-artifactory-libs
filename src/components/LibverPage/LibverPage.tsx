@@ -6,7 +6,7 @@ import {
   TableColumn,
   TableProps,
 } from '@backstage/core-components';
-import {configApiRef, useApi} from '@backstage/core-plugin-api';
+import { configApiRef, useApi } from '@backstage/core-plugin-api';
 import {
   CatalogFilterLayout,
   EntityKindPicker,
@@ -15,10 +15,10 @@ import {
   EntityTagPicker,
   EntityTypePicker,
 } from '@backstage/plugin-catalog-react';
-import React, {ReactNode} from 'react';
-import {LibverTable} from '../LibverTable';
-import {EntityLibraryFilterPicker} from './EntityLibraryFilter';
-import {LibverTableRow} from '../../types';
+import React, { ReactNode } from 'react';
+import { LibverTable } from '../LibverTable';
+import { EntityLibraryFilterPicker } from './EntityLibraryFilter';
+import { LibverTableRow } from '../../types';
 
 /**
  * Props for root catalog pages.
@@ -44,7 +44,7 @@ export function LibverPageContent(props: LibverPageProps) {
         </ContentHeader>
         <CatalogFilterLayout>
           <CatalogFilterLayout.Filters>
-            <EntityKindPicker initialFilter={'Component'} hidden={true} />
+            <EntityKindPicker initialFilter="Component" hidden />
             <EntityLibraryFilterPicker />
             <EntityTypePicker />
             <EntityOwnerPicker />
@@ -68,7 +68,12 @@ export function LibverPage(props: LibverPageProps) {
 
   return (
     <PageWithHeader title={`${orgName} Libraries`} themeId="home">
-      {LibverPageContent(props)}
+      <LibverPageContent
+        title={props.title}
+        columns={props.columns}
+        tableOptions={props.tableOptions}
+        topComponents={props.topComponents}
+      />
     </PageWithHeader>
   );
 }

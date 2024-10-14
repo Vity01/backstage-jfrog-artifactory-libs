@@ -1,13 +1,15 @@
-// import { on } from 'events';
 import { LibraryArtifact, MetadataResponse } from '../../types';
 import { findLatestVersion } from './versionUtils';
-import { IdentityApi } from '@backstage/core-plugin-api';
+import { FetchApi } from '@backstage/core-plugin-api';
 
 export type GeneratedCode = {
   gradle: string;
   maven: string;
   sbt: string;
   pip: string;
+  nuget: string;
+  npm: string;
+  yarn: string;
 };
 
 export type ArtifactInfo = {
@@ -47,23 +49,13 @@ export async function getErrorMessage(response: Response) {
 }
 
 export async function getRepositoryType(
-  fetch: {
-    (input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
-    (input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
-  },
   url: string,
   { repo }: LibraryArtifact,
-  identityApi: IdentityApi
+  fetchApi: FetchApi,
 ) {
-  // Obtain the token
-
-  const { token: idToken } = await identityApi.getCredentials();
-
-  const response = await fetch(`${url}artifactory/api/repositories/${repo}`, {
-    headers: {
-      Authorization: `Bearer ${idToken}`,
-    },
-  });
+  const response = await fetchApi.fetch(
+    `${url}artifactory/api/repositories/${repo}`,
+  );
   if (response.status === 404) {
     throw new Error(`Repository ${repo} was not found`);
   } else {
@@ -80,22 +72,12 @@ export async function getRepositoryType(
 }
 
 export async function getMavenLatestVersion(
-  fetch: {
-    (input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
-    (input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
-  },
   url: string,
   { group, artifact, repo }: LibraryArtifact,
-  identityApi: IdentityApi,
+  fetchApi: FetchApi,
 ) {
-
-  const { token: idToken } = await identityApi.getCredentials();
-
-  const response = await fetch(
-    `${url}artifactory/api/search/latestVersion?g=${group}&a=${artifact}&repos=${repo}`, {
-      headers: {
-        Authorization: `Bearer ${idToken}`,
-      },}
+  const response = await fetchApi.fetch(
+    `${url}artifactory/api/search/latestVersion?g=${group}&a=${artifact}&repos=${repo}`,
   );
   if (response.status === 404) {
     return undefined;
@@ -109,13 +91,13 @@ export async function getMavenLatestVersion(
   }
 }
 
-export function getMetadataVersionQuery(artifact: string) {
+export function getMetadataVersionQuery(artifact: string, packageType: string) {
   const query = {
     query:
       'query ($filter: VersionFilter!, $first: Int, $orderBy: VersionOrder) { versions (filter: $filter, first: $first, orderBy: $orderBy) { edges { node { name, created, modified, package { id }, repos { name, type, leadFilePath }, licenses { name, source }, size, stats { downloadCount }, vulnerabilities { critical, high, medium, low, info, unknown, skipped }, files { name, lead, size, md5, sha1, sha256, mimeType } } } } }',
     variables: {
       filter: {
-        packageId: `docker://${artifact}`,
+        packageId: `${packageType}://${artifact}`,
         name: '*',
         ignorePreRelease: false,
       },
@@ -148,24 +130,29 @@ export function extractArtifactFromFullDockerName(artifact: string): string {
   return artifactWithoutVersion;
 }
 
-export async function getDockerLatestVersion(
-  fetch: {
-    (input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
-    (input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
-  },
-  url: string,
-  { artifact }: LibraryArtifact,
-  identityApi: IdentityApi,
-) {
-  const { token: idToken } = await identityApi.getCredentials();
+function extractPathFromLeadFilePath(path: string) {
+  if (path) {
+    const lastSlash = path.lastIndexOf('/');
+    if (lastSlash) {
+      return path.substring(0, lastSlash);
+    }
+  }
+  return undefined;
+}
 
-  const response = await fetch(`${url}/metadata/api/v1/query`, {
+export async function getLatestCreatedVersion(
+  url: string,
+  libraryArtifact: LibraryArtifact,
+  packageType: string,
+  fetchApi: FetchApi,
+  artifactName: (libraryArtifact: LibraryArtifact) => string,
+) {
+  const response = await fetchApi.fetch(`${url}metadata/api/v1/query`, {
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${idToken}`,
     },
     method: 'POST',
-    body: getMetadataVersionQuery(extractArtifactFromFullDockerName(artifact)),
+    body: getMetadataVersionQuery(artifactName(libraryArtifact), packageType),
   });
   if (response.status === 404) {
     return undefined;
@@ -182,6 +169,10 @@ export async function getDockerLatestVersion(
         version: node.name,
         size: Number(node.size),
         statsDownload: node.stats.downloadCount,
+        filePath:
+          node.repos && node.repos.length > 0
+            ? extractPathFromLeadFilePath(node.repos[0].leadFilePath)
+            : undefined,
         lastModified: node.modified ? new Date(node.modified) : undefined,
       };
     }
@@ -190,21 +181,12 @@ export async function getDockerLatestVersion(
 }
 
 export async function getPypiLatestVersion(
-  fetch: {
-    (input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
-    (input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
-  },
   url: string,
   { artifact, repo }: LibraryArtifact,
-  identityApi: IdentityApi,
+  fetchApi: FetchApi,
 ) {
-  const { token: idToken } = await identityApi.getCredentials();
-
-  const response = await fetch(
-    `${url}/artifactory/api/search/prop?pypi.name=${artifact}&repos=${repo}`, {
-      headers: {
-        Authorization: `Bearer ${idToken}`,
-      },}
+  const response = await fetchApi.fetch(
+    `${url}artifactory/api/search/prop?pypi.name=${artifact}&repos=${repo}`,
   );
   if (response.status === 404) {
     return undefined;

@@ -21,7 +21,13 @@ import { capitalize } from 'lodash';
 import React, { ReactNode, useMemo, useRef, useState } from 'react';
 import { columnFactories } from './columns';
 import pluralize from 'pluralize';
-import { ConfigApi, configApiRef, useApi, identityApiRef, IdentityApi } from '@backstage/core-plugin-api';
+import {
+  ConfigApi,
+  configApiRef,
+  FetchApi,
+  fetchApiRef,
+  useApi,
+} from '@backstage/core-plugin-api';
 import useAsync from 'react-use/lib/useAsync';
 import { LibVerTabbedContent } from '../LibVerTabbedContent';
 import { ArtifactInfo } from '../LibArtifactCard/api';
@@ -56,7 +62,7 @@ const refCompare = (a: LibverTableRow, b: LibverTableRow) => {
 async function loadEntityItemData(
   entity: Entity,
   config: ConfigApi,
-  identity: IdentityApi,
+  fetchApi: FetchApi,
 ): Promise<LibverTableRow> {
   const partOfSystemRelations = getEntityRelations(entity, RELATION_PART_OF, {
     kind: 'system',
@@ -65,8 +71,9 @@ async function loadEntityItemData(
 
   let artifactInfo;
   try {
-    artifactInfo = await libraryInfo(entity, config, identity);
+    artifactInfo = await libraryInfo(entity, config, fetchApi);
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.error(e);
     artifactInfo = undefined;
   }
@@ -93,22 +100,35 @@ async function loadEntityItemData(
   };
 }
 
-function TableComponent(
-  entities: Entity[],
-  columns: TableColumn<LibverTableRow>[] | undefined,
-  defaultColumns: TableColumn<LibverTableRow>[],
-  showTypeColumn: boolean,
-  filters: DefaultEntityFilters,
-  titlePreamble: string,
-  loading1: boolean,
-  emptyContent?: ReactNode,
-  tableOptions?: TableProps<LibverTableRow>['options'] | undefined,
-  subtitle?: string,
-) {
+type TableComponentProps = {
+  entities: Entity[];
+  columns: TableColumn<LibverTableRow>[] | undefined;
+  defaultColumns: TableColumn<LibverTableRow>[];
+  showTypeColumn: boolean;
+  filters: DefaultEntityFilters;
+  titlePreamble: string;
+  loading1: boolean;
+  emptyContent?: ReactNode;
+  tableOptions?: TableProps<LibverTableRow>['options'] | undefined;
+  subtitle?: string;
+};
+
+const TableComponent = ({
+  entities,
+  columns,
+  defaultColumns,
+  showTypeColumn,
+  filters,
+  titlePreamble,
+  loading1,
+  emptyContent,
+  tableOptions,
+  subtitle,
+}: TableComponentProps) => {
   const [rows, setRows] = useState<LibverTableRow[]>([]);
   const [selectedRows, setSelectedRows] = useState<ArtifactInfo[]>([]);
   const config = useApi(configApiRef);
-  const identity = useApi(identityApiRef);
+  const fetchApi = useApi(fetchApiRef);
   const tableRef = useRef<any>(); // not sure if there's a better type for this
 
   const artifactoryUrl = useMemo(() => {
@@ -118,7 +138,7 @@ function TableComponent(
   const { loading, error } = useAsync(async () => {
     const results: LibverTableRow[] = [];
     const libverTableRows = await Promise.allSettled(
-      entities.map(entity => loadEntityItemData(entity, config, identity)),
+      entities.map(entity => loadEntityItemData(entity, config, fetchApi)),
     );
     libverTableRows.forEach(result => {
       if (result.status === 'fulfilled') {
@@ -126,6 +146,7 @@ function TableComponent(
         results.push(result.value);
       } else if (result.status === 'rejected') {
         // Handle rejected promise
+        // eslint-disable-next-line no-console
         console.error('Rejected:', result.reason);
       }
     });
@@ -175,11 +196,10 @@ function TableComponent(
             const items = rs
               .filter(item => item.resolved.artifactInfo)
               .map(item => item.resolved.artifactInfo as ArtifactInfo);
-            console.log('Items ', items);
             setSelectedRows(items);
           }}
           onRowClick={(_event, rowData) => {
-            console.log('Event', rowData);
+            // console.log('Event', rowData);
             if (tableRef.current) {
               // noinspection JSUnresolvedReference
               tableRef.current.dataManager.changeRowSelected(
@@ -189,9 +209,7 @@ function TableComponent(
               // noinspection JSUnresolvedReference
               tableRef.current.setState(
                 tableRef.current.dataManager.getRenderState(),
-                function () {
-                  return tableRef.current.onSelectionChange();
-                },
+                tableRef.current.onSelectionChange,
               );
             }
           }}
@@ -212,6 +230,9 @@ function TableComponent(
             showDockerfile: true,
             showGradle: true,
             showSbt: true,
+            showNpm: true,
+            showNuget: true,
+            showYarn: true,
             showMaven: true,
             showBrowseRepositoryLink: true,
             browseRepositoryLinkTitle: 'Open repository',
@@ -224,7 +245,7 @@ function TableComponent(
       </Grid>
     </Grid>
   );
-}
+};
 
 export const LibverTable = (props: LibverTableProps) => {
   const { columns, tableOptions, subtitle, emptyContent } = props;
@@ -290,17 +311,19 @@ export const LibverTable = (props: LibverTableProps) => {
   //     },
   //   };
   // });
-  return TableComponent(
-    entities,
-    columns,
-    defaultColumns,
-    showTypeColumn,
-    filters,
-    titlePreamble,
-    loading,
-    emptyContent,
-    tableOptions,
-    subtitle,
+  return (
+    <TableComponent
+      entities={entities}
+      columns={columns}
+      defaultColumns={defaultColumns}
+      showTypeColumn={showTypeColumn}
+      filters={filters}
+      titlePreamble={titlePreamble}
+      loading1={loading}
+      emptyContent={emptyContent}
+      tableOptions={tableOptions}
+      subtitle={subtitle}
+    />
   );
 };
 

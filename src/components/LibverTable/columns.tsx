@@ -20,11 +20,14 @@ import {
   EntityRefLinks,
 } from '@backstage/plugin-catalog-react';
 import { Chip } from '@material-ui/core';
-import {Link, OverflowTooltip, TableColumn} from '@backstage/core-components';
+import { Link, OverflowTooltip, TableColumn } from '@backstage/core-components';
 import { Entity } from '@backstage/catalog-model';
 import { JsonArray } from '@backstage/types';
-import {getBrowseArtifactUrl, getBrowserVersionUrl} from "../LibVerView/LibVerView";
-import {LibverTableRow} from "../../types";
+import {
+  getBrowseArtifactUrl,
+  getBrowserVersionUrl,
+} from '../LibVerView/LibVerView';
+import { LibverTableRow } from '../../types';
 
 // The columnFactories symbol is not directly exported, but through the
 // CatalogTable.columns field.
@@ -119,15 +122,15 @@ export const columnFactories = Object.freeze({
       render: ({ resolved }) => {
         if (resolved.artifactInfo) {
           return (
-              <Link
-                  to={getBrowserVersionUrl(
-                      artifactoryUrl,
-                      resolved.artifactInfo.lib,
-                  )}
-                  target="_blank"
-              >
-                {resolved.artifactInfo.lib.version || '?'}
-              </Link>
+            <Link
+              to={getBrowserVersionUrl(
+                artifactoryUrl,
+                resolved.artifactInfo.lib,
+              )}
+              target="_blank"
+            >
+              {resolved.artifactInfo.lib.version || '?'}
+            </Link>
           );
         }
         return null;

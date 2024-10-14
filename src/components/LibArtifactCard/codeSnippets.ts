@@ -1,16 +1,14 @@
 import { LibraryArtifact } from '../../types';
-import {GeneratedCode} from "./api";
+import { GeneratedCode } from './api';
 
 function removeScalaVersion(artifactName: string) {
   const underscorePos = artifactName.lastIndexOf('_');
-  if (underscorePos > 0) {
-    if (
-      artifactName.substring(underscorePos + 1).match(/^[0-9]|\?/gi) != null
-    ) {
-      return artifactName.substring(0, underscorePos);
-    }
-  }
-  return artifactName;
+  const hasScalaVersion =
+    underscorePos > 0 &&
+    artifactName.substring(underscorePos + 1).match(/^[0-9]|\?/gi);
+  return hasScalaVersion
+    ? artifactName.substring(0, underscorePos)
+    : artifactName;
 }
 
 function generateGradleMavenCode(
@@ -33,40 +31,40 @@ function generateGradleMavenCode(
 
   if (classifier !== '') {
     mavenClassifier = `\n\t<classifier>${classifier}</classifier>`;
-    gradleClassifier = ':' + classifier;
-    sbtClassifier = ' classifier ' + '"' + classifier + '"';
+    gradleClassifier = `:${classifier}`;
+    sbtClassifier = ` classifier ` + `"${classifier}"`;
   }
 
   const version = lib.version !== undefined ? lib.version : '';
 
-  const gradle =
-    gradleScope +
-    func1 +
-    lib.group +
-    ':' +
-    artifactWithoutScalaVersion +
-    gradleScalaVersion +
-    ':' +
-    version +
-    gradleClassifier +
-    packaging +
-    func2 +
-    transitive +
-    '\n';
+  const gradle = `${
+    gradleScope + func1 + lib.group
+  }:${artifactWithoutScalaVersion}${gradleScalaVersion}:${version}${gradleClassifier}${packaging}${func2}${transitive}\n`;
 
   const maven = `<dependency>\n\t<groupId>${lib.group}</groupId>\n\t<artifactId>${lib.artifact}</artifactId>\n\t<version>${version}</version>${mavenClassifier}\n\t<scope>${mavenScope}</scope>\n</dependency>\n`;
 
   const sbt =
     `"${lib.group}" ${sbtScalaVersion}% "${artifactWithoutScalaVersion}" % "${version}"${sbtClassifier}${sbtScope}` +
     ',\n';
-  return { gradle: gradle, maven: maven, sbt: sbt };
+  const npm = `"${lib.artifact}": "^${version}"`;
+  // command to add the package to the project using yarn
+  const yarn = `yarn add ${lib.artifact}`;
+  const nuget = `<PackageReference Include="${lib.artifact}" Version="${version}" />`;
+  return {
+    gradle: gradle,
+    maven: maven,
+    sbt: sbt,
+    npm: npm,
+    nuget: nuget,
+    yarn: yarn,
+  };
 }
 
 function getScalaVersion(artifactName: string) {
   const underscorePos = artifactName.lastIndexOf('_');
   if (underscorePos > 0) {
     const classifier = artifactName.substring(underscorePos + 1);
-    if (classifier.match(/^[0-9]|\?/gi) != null) {
+    if (classifier.match(/^[0-9]|\?/gi)) {
       return classifier;
     }
   }
@@ -82,6 +80,9 @@ export function generatePackageManagersCode(
   let maven = '';
   let sbt = '';
   let pip = '';
+  let nuget = '';
+  let npm = '';
+  let yarn = '';
 
   const version = lib.version !== undefined ? lib.version : '';
 
@@ -92,9 +93,9 @@ export function generatePackageManagersCode(
   if (replaceScalaVersion && scalaVersion) {
     scalaVersion = '?';
   }
-  let gradleScalaVersion = scalaVersion ? '_' + scalaVersion : '';
-  let sbtScalaVersion = scalaVersion ? '%' : '';
-  let artifactWithoutScalaVersion = removeScalaVersion(lib.artifact);
+  const gradleScalaVersion = scalaVersion ? `_${scalaVersion}` : '';
+  const sbtScalaVersion = scalaVersion ? '%' : '';
+  const artifactWithoutScalaVersion = removeScalaVersion(lib.artifact);
 
   let gradleScope = 'implementation';
   let mavenScope = 'compile';
@@ -131,7 +132,7 @@ export function generatePackageManagersCode(
   }
   let packaging = '';
   if (lib.packaging) {
-    packaging = '@' + lib.packaging;
+    packaging = `@${lib.packaging}`;
   }
   if (
     lib.classifiers &&
@@ -156,6 +157,8 @@ export function generatePackageManagersCode(
       gradle += __ret.gradle;
       maven += __ret.maven;
       sbt += __ret.sbt;
+      nuget += __ret.nuget;
+      npm += __ret.npm;
     });
   } else {
     const __ret = generateGradleMavenCode(
@@ -175,11 +178,17 @@ export function generatePackageManagersCode(
     gradle += __ret.gradle;
     maven += __ret.maven;
     sbt += __ret.sbt;
+    nuget += __ret.nuget;
+    npm += __ret.npm;
+    yarn += __ret.yarn;
   }
   return {
-    gradle: gradle,
-    maven: maven,
-    sbt: sbt,
-    pip: pip,
+    gradle,
+    maven,
+    sbt,
+    pip,
+    nuget,
+    npm,
+    yarn,
   };
 }

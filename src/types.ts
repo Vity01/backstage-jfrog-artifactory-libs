@@ -19,6 +19,9 @@ export type LibArtifactCardProps = {
   showMaven: boolean;
   showSbt: boolean;
   showPip: boolean;
+  showNuget: boolean;
+  showNpm: boolean;
+  showYarn: boolean;
   showDockerfile: boolean;
   autohideTabs: boolean;
   showBrowseRepositoryLink: boolean;
@@ -47,6 +50,7 @@ export type LibraryArtifact = {
   artifactFullName?: string;
   repo: string;
   version?: string;
+  filePath?: string;
   classifiers?: string[];
   scope?: string;
   transitive?: boolean;

@@ -1,5 +1,5 @@
 function convertToNumberOrString(value: string): number | string {
-  const parsedNumber = parseInt(value);
+  const parsedNumber = parseInt(value, 10);
   return isNaN(parsedNumber) ? value : parsedNumber;
 }
 
