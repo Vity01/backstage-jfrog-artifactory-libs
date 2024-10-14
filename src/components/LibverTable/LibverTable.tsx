@@ -232,6 +232,7 @@ const TableComponent = ({
             showSbt: true,
             showNpm: true,
             showNuget: true,
+            showYarn: true,
             showMaven: true,
             showBrowseRepositoryLink: true,
             browseRepositoryLinkTitle: 'Open repository',
