@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 import { z } from 'zod';
-import {CustomFieldExtensionSchema, makeFieldSchemaFromZod} from '@backstage/plugin-scaffolder';
+import { makeFieldSchemaFromZod } from '@backstage/plugin-scaffolder';
+import { CustomFieldExtensionSchema } from '@backstage/plugin-scaffolder-react';
 
 /**
  * @public

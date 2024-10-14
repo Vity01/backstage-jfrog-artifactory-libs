@@ -7,9 +7,10 @@ import {
 } from '@backstage/core-components';
 import { LibVerView } from '../LibVerView';
 import React from 'react';
-import { ArtifactInfo } from '../LibArtifactCard/api';
+import { ArtifactInfo, GeneratedCode } from '../LibArtifactCard/api';
 import { Divider, makeStyles } from '@material-ui/core';
 import { ClassNameMap } from '@material-ui/core/styles/withStyles';
+import { capitalize } from 'lodash';
 
 const useStyles = makeStyles({
   dividerMargin: {
@@ -39,12 +40,17 @@ function isPackageType(
   );
 }
 
-function getPipTab(artifactInfo: ArtifactInfo[] | undefined) {
+function getTab(
+  type: keyof GeneratedCode,
+  language: string = 'plainText',
+  artifactInfo: ArtifactInfo[] | undefined,
+  tabTitle?: string,
+) {
   return (
-    <CardTab label="Pip" key="artifactInfoPyPi">
+    <CardTab label={tabTitle || capitalize(type)} key="`artifactInfo${type}`">
       <CodeSnippet
-        language="plainText"
-        text={artifactInfo?.map(item => item.code().pip).join('\n') || ''}
+        language={language}
+        text={artifactInfo?.map(item => item.code()[type]).join('\n') || ''}
         showCopyCodeButton
       />
     </CardTab>
@@ -67,42 +73,6 @@ function getDockerfileTab(artifactInfo: ArtifactInfo[] | undefined) {
             )
             .join('\n') || ''
         }
-        showCopyCodeButton
-      />
-    </CardTab>
-  );
-}
-
-function getSbtTab(artifactInfo: ArtifactInfo[] | undefined) {
-  return (
-    <CardTab label="Sbt" key="artifactInfoSbt">
-      <CodeSnippet
-        language="plainText"
-        text={artifactInfo?.map(item => item.code().sbt).join('\n') || ''}
-        showCopyCodeButton
-      />
-    </CardTab>
-  );
-}
-
-function getMavenTab(artifactInfo: ArtifactInfo[] | undefined) {
-  return (
-    <CardTab label="Maven" key="artifactInfoMaven" hidden>
-      <CodeSnippet
-        language="xml"
-        text={artifactInfo?.map(item => item.code().maven).join('\n') || ''}
-        showCopyCodeButton
-      />
-    </CardTab>
-  );
-}
-
-function getGradleTab(artifactInfo: ArtifactInfo[] | undefined) {
-  return (
-    <CardTab label="Gradle" key="artifactInfoGradle" hidden>
-      <CodeSnippet
-        language="groovy"
-        text={artifactInfo?.map(item => item.code().gradle).join('\n') || ''}
         showCopyCodeButton
       />
     </CardTab>
@@ -153,16 +123,25 @@ export const LibVerTabbedContent = ({
   }
   if (!loading) {
     if (props.showGradle && isPackageType(props, artifactInfo, 'maven')) {
-      tabs.push(getGradleTab(artifactInfo));
+      tabs.push(getTab('gradle', 'groovy', artifactInfo));
     }
     if (props.showMaven && isPackageType(props, artifactInfo, 'maven')) {
-      tabs.push(getMavenTab(artifactInfo));
+      tabs.push(getTab('maven', 'xml', artifactInfo));
     }
     if (props.showSbt && isPackageType(props, artifactInfo, 'maven')) {
-      tabs.push(getSbtTab(artifactInfo));
+      tabs.push(getTab('sbt', 'plainText', artifactInfo));
     }
     if (props.showPip && isPackageType(props, artifactInfo, 'pypi')) {
-      tabs.push(getPipTab(artifactInfo));
+      tabs.push(getTab('pip', 'plainText', artifactInfo));
+    }
+    if (props.showNuget && isPackageType(props, artifactInfo, 'nuget')) {
+      tabs.push(getTab('nuget', 'xml', artifactInfo));
+    }
+    if (props.showNpm && isPackageType(props, artifactInfo, 'npm')) {
+      tabs.push(getTab('npm', 'json', artifactInfo));
+    }
+    if (props.showYarn && isPackageType(props, artifactInfo, 'npm')) {
+      tabs.push(getTab('yarn', 'plainText', artifactInfo));
     }
     if (props.showDockerfile && isPackageType(props, artifactInfo, 'docker')) {
       tabs.push(getDockerfileTab(artifactInfo));

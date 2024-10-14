@@ -1,9 +1,8 @@
 # Backstage JFrog artifactory libraries plugin
-
-The Backstage `jfrog-artifactory-libs` frontend plugin provides a simple way to display generated artifact (library)
-details like - group, artifact, repository, what is the latest version, and it simply allows to copy library definition
-for the package managers.   
-Nowadays, the plugin supports these package managers types in JFrog: Maven, Gradle, Sbt, Pypi, Docker.
+  The Backstage `jfrog-artifactory-libs` frontend plugin uses the JFrog Artifactory APIs to fetch details about artifacts (libraries)
+  and displays these details in the Backstage app, allowing users to view information about the artifact, such as the group,
+  artifact, repository, the latest version, and it also allows to copy library definition for the package managers. The plugin
+  supports these package managers types in JFrog: Maven, Gradle, Sbt, Pypi, Docker, NPM, Yarn, Nuget.
 
 
 ![Demo](./doc/artifact.gif)
@@ -11,10 +10,11 @@ Nowadays, the plugin supports these package managers types in JFrog: Maven, Grad
 <!-- TOC -->
 
 - [Backstage jfrog-artifactory-libs plugin](#backstage-xkcd-plugin)
+  - [Authentication](#authentication)
   - [Installation](#installation)
   - [Integration](#integration)
   - [Configuration](#configuration)
-    - [Support for scaffolding](#support-for-scaffolding) 
+    - [Support for scaffolding](#support-for-scaffolding)
   - [How it works](#how-it-works)
   - [Changes](#changes)
   - [Contributing](#contributing)
@@ -22,6 +22,12 @@ Nowadays, the plugin supports these package managers types in JFrog: Maven, Grad
   - [Future plans](#future-plans)
   - [License](#license)
   <!-- TOC -->
+
+## Authentication:
+
+- The jfrog-artifactory-libs plugin does not directly handle authentication. Instead, it relies on [Backstage basic HTTP proxy package](https://backstage.io/docs/plugins/proxying/)
+  which is configured to forward requests to JFrog Artifactory instance.
+
 
 ## Installation
 
@@ -38,26 +44,32 @@ yarn add --cwd packages/app backstage-plugin-jfrog-artifactory-libs
 Once you've installed the plugin, you'll need to integrate it into your Backstage app. To do so, you'll need to following code into your BS instance:
 
 ### JFrogLibArtifactCard
+
 Add the JFrogLibArtifactCard component to the `EntityPage.tsx` in your app:
 
 ```typescript jsx
-import {JFrogLibArtifactCard, isJfrogArtifactAvailable} from 'backstage-plugin-jfrog-artifactory-libs';
+import {
+  JFrogLibArtifactCard,
+  isJfrogArtifactAvailable,
+} from 'backstage-plugin-jfrog-artifactory-libs';
 //....
 const overviewContent = (
-// ...
-    <EntitySwitch>
-        //...
-        <EntitySwitch.Case if={isJfrogArtifactAvailable}>
-            <Grid item md={4}>
-                <JFrogLibArtifactCard/>
-            </Grid>
-        </EntitySwitch.Case>
-        //...
-    </EntitySwitch>
-    // ...
+  // ...
+  <EntitySwitch>
+    //...
+    <EntitySwitch.Case if={isJfrogArtifactAvailable}>
+      <Grid item md={4}>
+        <JFrogLibArtifactCard />
+      </Grid>
+    </EntitySwitch.Case>
+    //...
+  </EntitySwitch>
+  // ...
 );
 ```
+
 ### JFrogLibVerPage
+
 If you want to browse libraries you can enable this component in your `App.tsx` file. It shows all component entities containing `jfrog.com/artifactory-artifact` attribute.
 
 ![Demo](./doc/libs.gif)
@@ -66,8 +78,10 @@ If you want to browse libraries you can enable this component in your `App.tsx` 
 const routes = (
   <FlatRoutes>
     //....
-    <Route path="/libver" element={<JFrogLibVerPage topComponents={<DefineNewLibraryButton />} />}>
-    </Route>
+    <Route
+      path="/libver"
+      element={<JFrogLibVerPage topComponents={<DefineNewLibraryButton />} />}
+    ></Route>
     //....
   </FlatRoutes>
 );
@@ -75,7 +89,9 @@ const routes = (
 
 
 ### Explore page - JFrogLibVerPageContent
+
 This is a subcomponent of `JFrogLibVerPage` component. It's possible to integrate it for instance into your Explore page.
+
 ```typescript jsx
 import { JFrogLibVerPageContent } from 'backstage-plugin-jfrog-artifactory-libs';
 //....
@@ -100,13 +116,13 @@ import { JFrogLibVerPageContent } from 'backstage-plugin-jfrog-artifactory-libs'
 Set up a proxy for the JFrog API by adding the following configuration to your `app-config.yaml` file:
 
 ```yaml
-  '/artifactory-proxy/':
-    target: 'https://your-jfrog-artifactory-instance.com'
-    headers:
-      # if you use Jfrog instance for anonymous user token is not required, but it is also required for Docker package type
-      Authorization: Bearer ${ARTIFACTORY_TOKEN}
-      X-Result-Detail: 'properties'
-      Accept: '*'
+'/artifactory-proxy/':
+  target: 'https://your-jfrog-artifactory-instance.com'
+  headers:
+    # if you use Jfrog instance for anonymous user token is not required, but it is also required for Docker package type
+    Authorization: Bearer ${ARTIFACTORY_TOKEN}
+    X-Result-Detail: 'properties'
+    Accept: '*'
 ```
 
 You have to also reference your artifactory URL (used for UI browse links) and your proxy configuration.
@@ -115,7 +131,7 @@ You have to also reference your artifactory URL (used for UI browse links) and y
 jfrog:
   artifactory:
     url: 'https://your-jfrog-artifactory-instance.com'
-    proxyPath: '/artifactory-proxy/' # optional, /artifactory-proxy/ is default value 
+    proxyPath: '/artifactory-proxy/' # optional, /artifactory-proxy/ is default value
 ```
 
 ### Catalog-info.yaml
@@ -123,30 +139,34 @@ jfrog:
 Artifact details are correlated to Backstage entities using an annotation added in the entity's catalog-info.yaml file.
 
 ```yaml
-  metadata:
-    annotations:
-      # -- required values --
-      jfrog.com/artifactory-artifact: 'artifact-name'
-      jfrog.com/artifactory-repo: 'maven-local'
-
-      jfrog.com/artifactory-group: 'com.mycompany' # optional string - can be blank for pypi, necessary for Maven repos
-
-      # -- optional values --
-      jfrog.com/artifactory-scope: 'compile' # optional string, one of these [compile, test,provided,runtime,classpath,optional]
-      jfrog.com/artifactory-packaging: 'aar' #optional string, eg. `aar` 
-
+#...
+metadata:
+  annotations:
+    # -- required values --
+    jfrog.com/artifactory-artifact: 'artifact-name'
+    jfrog.com/artifactory-repo: 'maven-local'
+  
+    jfrog.com/artifactory-group: 'com.mycompany' # optional string - can be blank for pypi, necessary for Maven repos
+  
+    # -- optional values --
+    jfrog.com/artifactory-scope: 'compile' # optional string, one of these [compile, test,provided,runtime,classpath,optional]
+    jfrog.com/artifactory-packaging: 'aar' #optional string, eg. `aar`
+#...
 ```
 
 And that's it! The plugin should now be integrated into your Backstage app, and you should see the Artifact card when
 you navigate to the entity page where it's included.
 
 For a docker image you define repository and artifact name. Both formats are supported:
+
 ```yaml
-  metadata:
-    annotations:
-      # -- required values --
-      jfrog.com/artifactory-artifact: 'docker.mydomain.com/mygroup/my/artifact-name' # or simply 'mygroup/my/artifact-name' 
-      jfrog.com/artifactory-repo: 'docker-local'
+#...
+metadata:
+  annotations:
+    # -- required values --
+    jfrog.com/artifactory-artifact: 'docker.mydomain.com/mygroup/my/artifact-name' # or simply 'mygroup/my/artifact-name'
+    jfrog.com/artifactory-repo: 'docker-local'
+#...
 ```
 
 ![Demo](./doc/dockerfile.gif)
@@ -163,28 +183,33 @@ LibArtifactCard.defaultProps = {
     showMaven: true, // whether to  show Maven package manager tab
     showSbt: true, // whether to  show Sbt package manager tab
     showPip: true, // whether to  show Pip package manager tab
+    showYarn: true, // whether to show Yarn package manager tab
     showDockerfile: true, // whether to  show Dockerfile tab
     // it hides Maven and Gradle tabs if the current repository package type is `PyPi`
     autohideTabs: true,
-    showBrowseRepositoryLink: true // whether to show Browse to URL deep link under bottom of the Card
+    showBrowseRepositoryLink: true, // whether to show Browse to URL deep link under bottom of the Card
     // which link to open
     browseLink: browseLinkDefault,
 };
 
 ```
+
 ### Support for scaffolding
+
 In [this document](./doc/SCAFFOLDING.md) you can find detailed information how to integrate this plugin into scaffolding templates.
-It also adds a new extension UI component called `ArtifactRepositoryPicker` for interactive repository selection. 
+It also adds a new extension UI component called `ArtifactRepositoryPicker` for interactive repository selection.
 
 ## How it works
 
 Plugin uses JFrog APIs to find latest version. It's necessary to specify `ARTIFACTORY_TOKEN` in the `app-config.yaml`
 file if you don't allow to access API for anonymous user.
 
-## Changes 
-Version 1.0.9 
- - JFrogLibVerPageContent and JFrogLibVerPage components added
- - (!) renamed LibArtifactCard into JFrogLibArtifactCard
+## Changes
+
+Version 1.0.9
+
+- JFrogLibVerPageContent and JFrogLibVerPage components added
+- (!) renamed LibArtifactCard into JFrogLibArtifactCard
 
 ## Contributing
 

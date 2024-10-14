@@ -17,15 +17,27 @@ function getBrowseRepoUrl(artifactoryUrl: string, lib: LibraryArtifact) {
 }
 
 function getBrowsePackageUrl(artifactoryUrl: string, lib: LibraryArtifact) {
-  return `${getBrowseRepoUrl(artifactoryUrl, lib)}${
-    lib.group ? `/${lib.group?.replaceAll('.', '/')}` : ''
-  }`;
+  let result = '';
+  if (lib.filePath) {
+    result = `/${lib.filePath}`;
+  } else {
+    if (lib.group) {
+      if (!lib.group.startsWith('/')) {
+        result += '/';
+      }
+      result += lib.group.replaceAll('.', '/');
+    }
+  }
+  return `${getBrowseRepoUrl(artifactoryUrl, lib)}${result}`;
 }
 
 export function getBrowseArtifactUrl(
   artifactoryUrl: string,
   lib: LibraryArtifact,
 ) {
+  if (lib.filePath) {
+    return `${getBrowsePackageUrl(artifactoryUrl, lib)}`;
+  }
   return `${getBrowsePackageUrl(artifactoryUrl, lib)}/${lib.artifact}`;
 }
 
@@ -33,6 +45,9 @@ export function getBrowserVersionUrl(
   artUrl: string,
   lib: LibraryArtifact,
 ): string {
+  if (lib.filePath) {
+    return `${getBrowsePackageUrl(artUrl, lib)}`;
+  }
   return `${getBrowseArtifactUrl(artUrl, lib)}/${
     lib.version !== undefined ? lib.version : ''
   }`;

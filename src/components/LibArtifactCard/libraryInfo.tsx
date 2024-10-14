@@ -1,26 +1,27 @@
 import { Entity } from '@backstage/catalog-model';
 
 import { Config } from '@backstage/config';
-
-import { IdentityApi } from '@backstage/core-plugin-api';
-
 import {
   ENTITY_ARTIFACT,
   ENTITY_GROUP,
   ENTITY_PACKAGING,
   ENTITY_REPO,
   ENTITY_SCOPE,
-  isJfrogArtifactAvailable, isJfrogRepoAvailable,
-  LibraryArtifact
-} from "../../types";
+  isJfrogArtifactAvailable,
+  isJfrogRepoAvailable,
+  LibraryArtifact,
+} from '../../types';
 import {
   ArtifactInfo,
   extractArtifactFromFullDockerName,
-  getDockerLatestVersion, getMavenLatestVersion, getPypiLatestVersion,
+  getLatestCreatedVersion,
+  getMavenLatestVersion,
+  getPypiLatestVersion,
   getRepositoryType,
-  removeDockerVersion
-} from "./api";
-import {generatePackageManagersCode} from "./codeSnippets";
+  removeDockerVersion,
+} from './api';
+import { generatePackageManagersCode } from './codeSnippets';
+import { FetchApi } from '@backstage/core-plugin-api';
 
 export const DEFAULT_PROXY_PATH = '/artifactory-proxy/';
 
@@ -46,7 +47,7 @@ export function checkAnnotationsPresent(entity: Entity) {
 export async function libraryInfo(
   entity: Entity,
   config: Config,
-  identity: IdentityApi,
+  fetchApi: FetchApi,
 ): Promise<ArtifactInfo> {
   const artifactoryBackendProxy =
     config.getOptionalString('jfrog.artifactory.proxyPath') ||
@@ -57,31 +58,57 @@ export async function libraryInfo(
   const proxyUrl = `/proxy${artifactoryBackendProxy}`;
   //    try {
   const url = `${backendUrl}/api${proxyUrl}`;
-  const { packageType } = await getRepositoryType(fetch, url, entityArtifact,identity);
+
+  const { packageType } = await getRepositoryType(
+    url,
+    entityArtifact,
+    fetchApi,
+  );
   let version;
   const artInfo = { ...entityArtifact };
   switch (packageType) {
+    case 'maven':
+      version = await getMavenLatestVersion(url, entityArtifact, fetchApi);
+      break;
     case 'docker':
-      const dockerInfo = await getDockerLatestVersion(
-        fetch,
+      // eslint-disable-next-line no-case-declarations -- this just should be rewritten properly
+      const info = await getLatestCreatedVersion(
         url,
         entityArtifact,
-        identity,
+        packageType,
+        fetchApi,
+        libArt => extractArtifactFromFullDockerName(libArt.artifact),
       );
-      artInfo.stats = dockerInfo?.statsDownload;
-      artInfo.size = dockerInfo?.size;
+      artInfo.stats = info?.statsDownload;
+      artInfo.size = info?.size;
       artInfo.artifactFullName = removeDockerVersion(artInfo.artifact);
-      artInfo.lastModified = dockerInfo?.lastModified
-        ? new Date(dockerInfo?.lastModified)
+      artInfo.lastModified = info?.lastModified
+        ? new Date(info?.lastModified)
         : undefined;
       artInfo.artifact = extractArtifactFromFullDockerName(artInfo.artifact);
-      version = dockerInfo?.version;
+      version = info?.version;
       break;
     case 'pypi':
-      version = await getPypiLatestVersion(fetch, url, entityArtifact,identity);
+      version = await getPypiLatestVersion(url, entityArtifact, fetchApi);
       break;
-    default:
-      version = await getMavenLatestVersion(fetch, url, entityArtifact,identity);
+    default: {
+      const info = await getLatestCreatedVersion(
+        url,
+        entityArtifact,
+        packageType,
+        fetchApi,
+        libArt => libArt.artifact,
+      );
+      artInfo.stats = info?.statsDownload;
+      artInfo.size = info?.size;
+      artInfo.artifactFullName = artInfo.artifact;
+      artInfo.filePath = info?.filePath;
+      artInfo.lastModified = info?.lastModified
+        ? new Date(info?.lastModified)
+        : undefined;
+      version = info?.version;
+      break;
+    }
   }
 
   artInfo.version = version;
